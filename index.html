@@ -23,7 +23,6 @@ body{
     color:var(--text);
 }
 
-/* HEADER */
 header{
     display:flex;
     justify-content:space-between;
@@ -128,21 +127,8 @@ z-index:999;
 .correct{color:lightgreen;}
 .wrong{color:red;}
 
-/* 📱 MOBILE */
 @media(max-width:768px){
-    .layout{
-        grid-template-columns:1fr;
-    }
-    .sidebar{
-        order:2;
-    }
-    .main{
-        order:1;
-    }
-    button{
-        width:100%;
-        margin-top:5px;
-    }
+    .layout{grid-template-columns:1fr;}
 }
 </style>
 </head>
@@ -150,7 +136,7 @@ z-index:999;
 <body>
 
 <header>
-<h3>AI Exam Pro</h3>
+<h3>AI Exam Pro 🚀</h3>
 </header>
 
 <!-- LOADER -->
@@ -163,10 +149,10 @@ z-index:999;
 <input id="topic" placeholder="e.g. Percentage">
 
 <label>🔢 Number of Questions</label>
-<input id="count" type="number" min="1" max="100" value="10">
+<input id="count" type="number" value="10">
 
 <label>⏱ Time (minutes)</label>
-<input id="time" type="number" min="1" max="180" value="10">
+<input id="time" type="number" value="10">
 
 <label>🎚 Difficulty</label>
 <select id="level">
@@ -219,28 +205,40 @@ let quiz=[],ans=[],i=0,timeLeft,timerInt;
 /* START */
 async function startExam(){
 
-document.getElementById("loader").style.display="flex";
-
 let topic=document.getElementById("topic").value.trim();
 let count=parseInt(document.getElementById("count").value);
 let time=parseInt(document.getElementById("time").value);
 let level=document.getElementById("level").value;
 
-if(!topic){ alert("Enter topic"); return; }
+if(!topic){
+    alert("Enter topic");
+    return;
+}
+
+document.getElementById("loader").style.display="flex";
 
 timeLeft=time*60;
 
 try{
 
-let res=await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
-quiz=await res.json();
+let res = await Promise.race([
+    fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`),
+    new Promise((_, reject) => setTimeout(() => reject("Server timeout"), 10000))
+]);
+
+let data = await res.json();
+
+if(!data || data.length === 0){
+    throw new Error("No questions received");
+}
+
+quiz=data;
+ans=new Array(quiz.length).fill(null);
 
 document.getElementById("loader").style.display="none";
 
-ans=new Array(quiz.length).fill(null);
-
-config.style.display="none";
-exam.style.display="block";
+document.getElementById("config").style.display="none";
+document.getElementById("exam").style.display="block";
 
 buildPalette();
 showQ();
@@ -248,7 +246,7 @@ startTimer();
 
 }catch(e){
 document.getElementById("loader").style.display="none";
-alert("Error loading quiz");
+alert("❌ Error: " + e);
 }
 }
 
@@ -258,33 +256,48 @@ timerInt=setInterval(()=>{
 timeLeft--;
 let m=Math.floor(timeLeft/60);
 let s=timeLeft%60;
-timer.innerText=`${m}:${s<10?"0":""}${s}`;
+document.getElementById("timer").innerText=`${m}:${s<10?"0":""}${s}`;
 if(timeLeft<=0)submitExam();
 },1000);
 }
 
-/* SHOW */
+/* SHOW QUESTION */
 function showQ(){
 let q=quiz[i];
-qbox.innerHTML=`
+document.getElementById("qbox").innerHTML=`
 <h3>${i+1}. ${q.q}</h3>
 ${q.options.map((o,x)=>`
 <div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
 `).join("")}
 `;
+
+updatePalette();
 }
 
 /* ACTION */
-function select(x){ans[i]=x;showQ();}
+function select(x){
+ans[i]=x;
+showQ();
+}
+
+/* NAV */
 function next(){if(i<quiz.length-1){i++;showQ();}}
 function prev(){if(i>0){i--;showQ();}}
 
 /* PALETTE */
 function buildPalette(){
-palette.innerHTML=quiz.map((_,x)=>`
+document.getElementById("palette").innerHTML=quiz.map((_,x)=>`
 <div class="p" onclick="jump(${x})">${x+1}</div>
 `).join("");
 }
+
+function updatePalette(){
+let items=document.querySelectorAll(".p");
+items.forEach((el,x)=>{
+el.classList.toggle("done",ans[x]!=null);
+});
+}
+
 function jump(x){i=x;showQ();}
 
 /* RESULT */
@@ -302,18 +315,18 @@ else wrong++;
 
 let acc=((correct/quiz.length)*100).toFixed(1);
 
-exam.style.display="none";
-dash.style.display="block";
+document.getElementById("exam").style.display="none";
+document.getElementById("dash").style.display="block";
 
-score.innerText=`Score: ${correct}/${quiz.length}`;
-accuracy.innerText=`Accuracy: ${acc}%`;
+document.getElementById("score").innerText=`Score: ${correct}/${quiz.length}`;
+document.getElementById("accuracy").innerText=`Accuracy: ${acc}%`;
 
-insight.innerText=
+document.getElementById("insight").innerText=
 acc>80?"🔥 Excellent":
 acc>50?"👍 Good":
 "⚠️ Practice more";
 
-new Chart(chart,{
+new Chart(document.getElementById("chart"),{
 type:"doughnut",
 data:{
 labels:["Correct","Wrong","Skipped"],
@@ -322,20 +335,22 @@ datasets:[{data:[correct,wrong,skip]}]
 });
 
 /* REVIEW */
-review.innerHTML="<h2>Answer Review</h2>";
+let reviewHTML="<h2>Answer Review</h2>";
 
 quiz.forEach((q,x)=>{
-review.innerHTML+=`
+reviewHTML+=`
 <div class="card">
 <b>Q${x+1}. ${q.q}</b><br>
 Your: <span class="${ans[x]==q.correct?'correct':'wrong'}">
 ${ans[x]!=null?q.options[ans[x]]:"Not Attempted"}
 </span><br>
 Correct: ${q.options[q.correct]}<br>
-${q.explanation}
+${q.explanation || ""}
 </div>
 `;
 });
+
+document.getElementById("review").innerHTML=reviewHTML;
 
 }
 
