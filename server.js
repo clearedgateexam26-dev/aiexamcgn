@@ -6,24 +6,31 @@ const fs = require('fs');
 const OpenAI = require("openai");
 
 const app = express();
+
+// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// ✅ STEP 1: STATIC FILE SERVING
-// Adjust this to wherever your index.html is located
-let frontendPath = path.join(__dirname, 'frontend');
-if (!fs.existsSync(frontendPath)) {
-    frontendPath = __dirname; 
-}
+// 1. Setup Static Path
+// This ensures it works locally AND on servers like Render/Vercel
+const frontendPath = fs.existsSync(path.join(__dirname, 'frontend')) 
+    ? path.join(__dirname, 'frontend') 
+    : __dirname;
+
 app.use(express.static(frontendPath));
 
-// ✅ STEP 2: GITHUB MODELS CONFIGURATION
+// 2. Initialize OpenAI (GitHub Models)
+// Error check to prevent the server from crashing if token is missing
+if (!process.env.GITHUB_TOKEN) {
+    console.error("❌ ERROR: GITHUB_TOKEN is not defined in environment variables.");
+}
+
 const client = new OpenAI({
   baseURL: "https://models.inference.ai.azure.com",
-  apiKey: process.env.GITHUB_TOKEN, 
+  apiKey: process.env.GITHUB_TOKEN || "missing_token", 
 });
 
-// ✅ STEP 3: API ROUTE WITH EXPLANATION LOGIC
+// 3. Quiz API Route
 app.get('/api/quiz', async (req, res) => {
     const topic = req.query.topic || "General Knowledge";
     
@@ -32,61 +39,42 @@ app.get('/api/quiz', async (req, res) => {
             messages: [
                 { 
                     role: "system", 
-                    content: `You are a professional exam generator. 
-                    Return ONLY a raw JSON array of 10 objects. 
-                    Do not include markdown formatting, backticks, or "json" labels.
-                    Each object must strictly follow this structure:
-                    {"q": "question", "options": ["A", "B", "C", "D"], "correct": 0, "explanation": "detailed reason"}`
+                    content: "Return ONLY a raw JSON array. No markdown. Use this structure: [{\"q\":\"text\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"correct\":0,\"explanation\":\"text\"}]" 
                 },
                 { 
                     role: "user", 
-                    content: `Generate a 10-question MCQ quiz about: ${topic}. 
-                    Ensure the 'explanation' field is detailed and educational.` 
+                    content: `Generate 10 MCQs for ${topic} with detailed explanations.` 
                 }
             ],
-            model: "gpt-4o", // Or "gpt-4o-mini" for faster results
+            model: "gpt-4o",
             temperature: 0.7
         });
 
-        // Extract the text content
-        let rawContent = response.choices[0].message.content.trim();
-
-        // CLEANING: Remove markdown code blocks if the AI accidentally included them
-        const cleanedJson = rawContent
-            .replace(/^```json/i, '') // Remove opening ```json
-            .replace(/^```/i, '')     // Remove opening ```
-            .replace(/```$/i, '')      // Remove closing ```
-            .trim();
-
-        try {
-            const quizData = JSON.parse(cleanedJson);
-            res.json(quizData);
-        } catch (parseError) {
-            console.error("Failed to parse AI JSON:", cleanedJson);
-            res.status(500).json({ error: "AI returned invalid JSON format" });
-        }
-
+        let text = response.choices[0].message.content.trim();
+        
+        // Clean markdown backticks if AI provides them
+        text = text.replace(/```json|```/gi, "").trim();
+        
+        const quizData = JSON.parse(text);
+        res.json(quizData);
     } catch (error) {
         console.error("❌ API Error:", error.message);
-        res.status(500).json({ error: "Failed to connect to AI service" });
+        res.status(500).json({ error: "AI failed to generate quiz. Check API Token." });
     }
 });
 
-// ✅ STEP 4: FALLBACK TO INDEX.HTML
+// 4. Fallback Route
 app.get('*', (req, res) => {
-    const indexPath = path.join(frontendPath, 'index.html');
-    if (fs.existsSync(indexPath)) {
-        res.sendFile(indexPath);
+    const file = path.join(frontendPath, 'index.html');
+    if (fs.existsSync(file)) {
+        res.sendFile(file);
     } else {
-        res.status(404).send("index.html not found");
+        res.status(404).send("index.html not found. Check your file structure.");
     }
 });
 
+// 5. Port Binding (Required for successful deployment)
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`
-🚀 Server is screaming fast on port ${PORT}
-📂 Serving files from: ${frontendPath}
-🔗 http://localhost:${PORT}
-    `);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
