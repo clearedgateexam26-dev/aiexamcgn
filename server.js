@@ -12,7 +12,6 @@ app.use(cors());
 app.use(express.json());
 
 // 1. Setup Static Path
-// This ensures it works locally AND on servers like Render/Vercel
 const frontendPath = fs.existsSync(path.join(__dirname, 'frontend')) 
     ? path.join(__dirname, 'frontend') 
     : __dirname;
@@ -20,11 +19,6 @@ const frontendPath = fs.existsSync(path.join(__dirname, 'frontend'))
 app.use(express.static(frontendPath));
 
 // 2. Initialize OpenAI (GitHub Models)
-// Error check to prevent the server from crashing if token is missing
-if (!process.env.GITHUB_TOKEN) {
-    console.error("❌ ERROR: GITHUB_TOKEN is not defined in environment variables.");
-}
-
 const client = new OpenAI({
   baseURL: "https://models.inference.ai.azure.com",
   apiKey: process.env.GITHUB_TOKEN || "missing_token", 
@@ -39,7 +33,7 @@ app.get('/api/quiz', async (req, res) => {
             messages: [
                 { 
                     role: "system", 
-                    content: "Return ONLY a raw JSON array. No markdown. Use this structure: [{\"q\":\"text\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"correct\":0,\"explanation\":\"text\"}]" 
+                    content: "Return ONLY a raw JSON array. No markdown. Format: [{\"q\":\"text\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"correct\":0,\"explanation\":\"text\"}]" 
                 },
                 { 
                     role: "user", 
@@ -51,20 +45,19 @@ app.get('/api/quiz', async (req, res) => {
         });
 
         let text = response.choices[0].message.content.trim();
-        
-        // Clean markdown backticks if AI provides them
         text = text.replace(/```json|```/gi, "").trim();
         
         const quizData = JSON.parse(text);
         res.json(quizData);
     } catch (error) {
         console.error("❌ API Error:", error.message);
-        res.status(500).json({ error: "AI failed to generate quiz. Check API Token." });
+        res.status(500).json({ error: "AI failed to generate quiz." });
     }
 });
 
-// 4. Fallback Route
-app.get('*', (req, res) => {
+// 4. FIX: The Wildcard Route for Express 5.0+
+// Instead of '*', we use '(.*)' to catch all frontend routes
+app.get('(.*)', (req, res) => {
     const file = path.join(frontendPath, 'index.html');
     if (fs.existsSync(file)) {
         res.sendFile(file);
@@ -73,8 +66,8 @@ app.get('*', (req, res) => {
     }
 });
 
-// 5. Port Binding (Required for successful deployment)
+// 5. Port Binding
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`🚀 Server live on port ${PORT}`);
 });
