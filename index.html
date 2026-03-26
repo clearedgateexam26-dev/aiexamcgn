@@ -3,277 +3,250 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Exam Config Pro</title>
+<title>AI Exam Ultra Pro</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
-    --primary:#00e5ff;
     --bg:#0b0e14;
-    --card:#111;
+    --card:rgba(255,255,255,0.05);
+    --text:#fff;
+    --primary:#00e5ff;
 }
 
 body{
     margin:0;
     font-family:'Inter',sans-serif;
-    background:var(--bg);
-    color:white;
+    background:linear-gradient(135deg,#0b0e14,#16222a);
+    color:var(--text);
 }
 
 /* HEADER */
 header{
-    padding:15px;
-    text-align:center;
-    font-size:1.5rem;
-    font-weight:800;
-    background:linear-gradient(90deg,#00e5ff,#4facfe);
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
+    display:flex;
+    justify-content:space-between;
+    padding:15px 25px;
+    backdrop-filter:blur(10px);
 }
 
-/* CONFIG BOX */
+/* CONFIG */
 .config{
-    max-width:600px;
-    margin:40px auto;
+    max-width:500px;
+    margin:60px auto;
     background:var(--card);
     padding:30px;
     border-radius:15px;
+    backdrop-filter:blur(15px);
 }
 
-label{
-    font-size:0.9rem;
-    opacity:0.7;
-}
-
-input,select{
+input{
     width:100%;
     padding:12px;
-    margin:8px 0 15px;
+    margin:10px 0;
     border:none;
     border-radius:8px;
     background:#222;
     color:white;
 }
 
-/* Toggle */
-.toggle{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    background:#222;
-    padding:10px;
-    border-radius:8px;
-}
-
-.switch{
-    position:relative;
-    width:50px;height:25px;
-}
-.switch input{display:none;}
-.slider{
-    position:absolute;
-    cursor:pointer;
-    background:#555;
-    border-radius:25px;
-    top:0;left:0;right:0;bottom:0;
-}
-.slider:before{
-    content:"";
-    position:absolute;
-    height:20px;width:20px;
-    left:3px;top:2px;
-    background:white;
-    border-radius:50%;
-    transition:0.3s;
-}
-input:checked + .slider{
-    background:var(--primary);
-}
-input:checked + .slider:before{
-    transform:translateX(24px);
-}
-
-/* BUTTON */
 button{
     width:100%;
-    padding:14px;
-    background:var(--primary);
+    padding:12px;
     border:none;
-    border-radius:10px;
-    font-weight:700;
+    border-radius:8px;
+    background:var(--primary);
+    font-weight:600;
     cursor:pointer;
+}
+
+/* LOADER */
+.loader-screen{
+    position:fixed;
+    top:0;left:0;
+    width:100%;
+    height:100%;
+    background:#0b0e14;
+    display:none;
+    justify-content:center;
+    align-items:center;
+    flex-direction:column;
+    z-index:999;
+}
+
+.spinner{
+    width:50px;
+    height:50px;
+    border:5px solid #333;
+    border-top:5px solid var(--primary);
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+}
+
+@keyframes spin{
+    100%{transform:rotate(360deg);}
 }
 
 /* EXAM */
-.exam{
-    display:none;
-    padding:20px;
-}
-
+.exam{display:none;padding:20px;}
 .card{
-    background:#1e1e1e;
+    background:var(--card);
     padding:20px;
     border-radius:12px;
+    backdrop-filter:blur(10px);
+    animation:fade 0.4s ease;
+}
+
+@keyframes fade{
+    from{opacity:0;transform:translateY(10px)}
+    to{opacity:1}
 }
 
 .option{
-    padding:10px;
+    padding:12px;
     margin:8px 0;
-    background:#333;
+    background:#2a2a2a;
     border-radius:8px;
     cursor:pointer;
 }
-.selected{
-    background:var(--primary);
-    color:black;
-}
+.option:hover{background:var(--primary);color:black}
+.selected{background:var(--primary);color:black}
 
-/* TOP BAR */
-.top{
-    display:flex;
-    justify-content:space-between;
-    margin-bottom:10px;
-}
-
-/* RESPONSIVE */
-@media(max-width:600px){
-    .config{margin:20px;}
+/* DASHBOARD */
+.dashboard{
+    display:none;
+    padding:20px;
 }
 </style>
 </head>
 
 <body>
 
-<header>AI Exam Setup Pro</header>
+<header>
+<h3>AI Exam Ultra</h3>
+</header>
 
-<!-- CONFIG -->
-<div class="config" id="configBox">
-
-<label>📚 Topic</label>
-<input id="topic" placeholder="e.g. Percentage">
-
-<label>🔢 Number of Questions</label>
-<input type="number" id="count" value="10">
-
-<label>⏱ Time (minutes)</label>
-<input type="number" id="time" value="10">
-
-<label>📄 Previous Year Questions</label>
-<div class="toggle">
-    <span>Include PYQs</span>
-    <label class="switch">
-        <input type="checkbox" id="pyq">
-        <span class="slider"></span>
-    </label>
+<!-- LOADER -->
+<div class="loader-screen" id="loader">
+<div class="spinner"></div>
+<p>Generating AI Questions...</p>
 </div>
 
-<br>
-<button onclick="startExam()">Start Exam</button>
-
+<!-- CONFIG -->
+<div class="config" id="config">
+<input id="topic" placeholder="Enter topic">
+<input id="count" type="number" value="10">
+<input id="time" type="number" value="10">
+<button onclick="startExam()" id="startBtn">Start Exam</button>
 </div>
 
 <!-- EXAM -->
-<div class="exam" id="examBox">
-
-<div class="top">
-<div id="qno"></div>
+<div class="exam" id="exam">
 <div id="timer"></div>
-</div>
-
-<div id="question"></div>
-
-<button onclick="prev()">Prev</button>
+<div id="qbox"></div>
 <button onclick="next()">Next</button>
 <button onclick="submitExam()">Submit</button>
+</div>
 
+<!-- DASHBOARD -->
+<div class="dashboard" id="dash">
+<h2>Result</h2>
+<canvas id="chart"></canvas>
+<div id="summary"></div>
 </div>
 
 <script>
+let quiz=[],i=0,ans=[],timeLeft,timerInt;
 
-let quiz=[],i=0,answers=[],timeLeft,interval;
-
-/* START */
 async function startExam(){
-    let topic=document.getElementById("topic").value;
-    let count=document.getElementById("count").value;
-    let time=document.getElementById("time").value;
-    let pyq=document.getElementById("pyq").checked;
+let btn=document.getElementById("startBtn");
+btn.disabled=true;
 
-    timeLeft=time*60;
+loader.style.display="flex";
 
-    let res=await fetch(`/api/quiz?topic=${topic}&count=${count}&pyq=${pyq}`);
-    quiz=await res.json();
+let topic=topic.value;
+let count=document.getElementById("count").value;
+let time=document.getElementById("time").value;
 
-    answers=new Array(quiz.length).fill(null);
+timeLeft=time*60;
 
-    document.getElementById("configBox").style.display="none";
-    document.getElementById("examBox").style.display="block";
+try{
+let res=await fetch(`/api/quiz?topic=${topic}&count=${count}`);
+quiz=await res.json();
 
-    showQ();
-    startTimer();
+loader.style.display="none";
+config.style.display="none";
+exam.style.display="block";
+
+ans=new Array(quiz.length).fill(null);
+
+showQ();
+startTimer();
+
+}catch(e){
+loader.style.display="none";
+alert("Error loading questions");
+btn.disabled=false;
+}
 }
 
-/* TIMER */
 function startTimer(){
-    interval=setInterval(()=>{
-        timeLeft--;
-        let m=Math.floor(timeLeft/60);
-        let s=timeLeft%60;
-        document.getElementById("timer").innerText=`${m}:${s<10?"0":""}${s}`;
-        if(timeLeft<=0) submitExam();
-    },1000);
+timerInt=setInterval(()=>{
+timeLeft--;
+timer.innerText=timeLeft;
+if(timeLeft<=0)submitExam();
+},1000);
 }
 
-/* SHOW QUESTION */
 function showQ(){
-    let q=quiz[i];
+let q=quiz[i];
 
-    document.getElementById("qno").innerText=`Q ${i+1}/${quiz.length}`;
-
-    document.getElementById("question").innerHTML=`
-    <div class="card">
-        <h3>${q.q}</h3>
-        ${q.options.map((o,x)=>`
-            <div class="option ${answers[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
-        `).join("")}
-    </div>
-    `;
+qbox.innerHTML=`
+<div class="card">
+<h3>${i+1}. ${q.q}</h3>
+${q.options.map((o,x)=>`
+<div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
+`).join("")}
+</div>
+`;
 }
 
 function select(x){
-    answers[i]=x;
-    showQ();
+ans[i]=x;
+showQ();
 }
 
 function next(){ if(i<quiz.length-1){i++;showQ();}}
-function prev(){ if(i>0){i--;showQ();}}
 
-/* RESULT */
 function submitExam(){
-    clearInterval(interval);
+clearInterval(timerInt);
 
-    let score=0;
-    let html="<h2>Result + Explanation</h2>";
+let correct=0,wrong=0,skip=0;
 
-    quiz.forEach((q,x)=>{
-        if(answers[x]==q.correct) score++;
+quiz.forEach((q,x)=>{
+if(ans[x]==null)skip++;
+else if(ans[x]==q.correct)correct++;
+else wrong++;
+});
 
-        html+=`
-        <div class="card">
-        <b>Q${x+1}. ${q.q}</b><br>
-        Your: ${answers[x]!=null?q.options[answers[x]]:"Not Attempted"}<br>
-        Correct: ${q.options[q.correct]}<br>
-        <small>${q.explanation}</small>
-        </div>
-        `;
-    });
+exam.style.display="none";
+dash.style.display="block";
 
-    html=`<h2>Score: ${score}/${quiz.length}</h2>` + html;
+summary.innerHTML=`
+Score: ${correct}/${quiz.length}<br>
+Wrong: ${wrong}<br>
+Skipped: ${skip}
+`;
 
-    document.getElementById("examBox").innerHTML=html;
+new Chart(chart,{
+type:"pie",
+data:{
+labels:["Correct","Wrong","Skipped"],
+datasets:[{data:[correct,wrong,skip]}]
 }
-
+});
+}
 </script>
 
 </body>
