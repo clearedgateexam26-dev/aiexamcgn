@@ -1,51 +1,35 @@
-require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const path = require('path');
-const OpenAI = require('openai');
+// ... (previous imports and setup stay the same)
 
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-// serve frontend
-app.use(express.static(path.join(__dirname, 'public')));
-
-// OpenAI setup
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
-
-// API
+// ✅ UPDATED API ROUTE
 app.get('/api/quiz', async (req, res) => {
     const topic = req.query.topic || "General Knowledge";
-
     try {
         const response = await client.chat.completions.create({
-            model: "gpt-4o-mini",
             messages: [
-                {
-                    role: "system",
-                    content: "Return ONLY JSON array. No markdown."
+                { 
+                    role: "system", 
+                    content: "Return ONLY a raw JSON array. You are an expert exam tutor. Every question must include a detailed explanation." 
                 },
-                {
-                    role: "user",
-                    content: `Generate 10 exam-level MCQs on ${topic} with explanation.
-                    Format: [{"q":"","options":["","","",""],"correct":0,"explanation":""}]`
+                { 
+                    role: "user", 
+                    content: `Generate 10 MCQs for ${topic}. 
+                    Format exactly as: [{"q":"Question text","options":["A","B","C","D"],"correct":0,"explanation":"Explain why the answer is correct and why others are wrong."}]` 
                 }
-            ]
+            ],
+            model: "gpt-4o", 
         });
 
         let text = response.choices[0].message.content.trim();
-        text = text.replace(/```json|```/g, "");
-
-        const data = JSON.parse(text);
-        res.json(data);
-
-    } catch (err) {
-        console.error(err.message);
-        res.status(500).json({ error: "AI failed" });
+        
+        // Clean markdown backticks if the model ignores the "raw JSON" instruction
+        text = text.replace(/```json|```/gi, "").trim();
+        
+        const quizData = JSON.parse(text);
+        res.json(quizData);
+    } catch (error) {
+        console.error("❌ API Error:", error.message);
+        res.status(500).json({ error: "AI failed to generate quiz or explanation" });
     }
 });
 
-app.listen(3000, () => console.log("Server running on http://localhost:3000"));
+// ... (rest of the server code stays the same)
