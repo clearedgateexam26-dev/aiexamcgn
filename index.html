@@ -3,323 +3,181 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Exam Ultra Pro X</title>
+<title>AI Exam Pro Final</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-
-/* =========================
-   GLOBAL DESIGN SYSTEM
-========================= */
-
 :root{
     --bg:#0b0e14;
-    --card:rgba(255,255,255,0.05);
-    --text:#ffffff;
+    --card:#111;
+    --text:#fff;
     --primary:#00e5ff;
-    --secondary:#4facfe;
-    --muted:#888;
-    --radius:12px;
 }
 
 .light{
     --bg:#f5f5f5;
-    --card:#ffffff;
+    --card:#fff;
     --text:#111;
-    --muted:#555;
-}
-
-/* RESET */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-    transition:all 0.2s ease;
 }
 
 body{
+    margin:0;
     font-family:'Inter',sans-serif;
-    background:linear-gradient(135deg,#0b0e14,#16222a);
+    background:var(--bg);
     color:var(--text);
-    min-height:100vh;
 }
 
-/* =========================
-   HEADER
-========================= */
-
+/* HEADER */
 header{
     display:flex;
     justify-content:space-between;
-    align-items:center;
-    padding:15px 25px;
-    backdrop-filter:blur(10px);
-    background:rgba(0,0,0,0.3);
-    position:sticky;
-    top:0;
-    z-index:100;
+    padding:15px 20px;
+    background:var(--card);
 }
 
-.logo{
-    font-size:1.3rem;
-    font-weight:800;
-    background:linear-gradient(to right,var(--primary),var(--secondary));
-    -webkit-background-clip:text;
-    -webkit-text-fill-color:transparent;
-}
-
-.theme-btn{
+button{
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:var(--primary);
     cursor:pointer;
 }
 
-/* =========================
-   CONFIG PANEL
-========================= */
-
+/* CONFIG */
 .config{
     max-width:500px;
-    margin:60px auto;
-    padding:30px;
+    margin:40px auto;
+    padding:25px;
     background:var(--card);
-    border-radius:var(--radius);
-    backdrop-filter:blur(15px);
+    border-radius:10px;
 }
 
-.input-group{
-    margin-bottom:15px;
-}
-
-label{
-    font-size:0.8rem;
-    color:var(--muted);
-}
-
-input{
+input,select{
     width:100%;
     padding:12px;
-    margin-top:5px;
-    border:none;
-    border-radius:8px;
+    margin:10px 0;
     background:#222;
     color:white;
-}
-
-.start-btn{
-    width:100%;
-    padding:12px;
     border:none;
-    border-radius:8px;
-    background:var(--primary);
-    font-weight:600;
-    cursor:pointer;
+    border-radius:6px;
 }
 
-/* =========================
-   LOADER
-========================= */
-
-.loader{
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background:#0b0e14;
-    display:none;
-    flex-direction:column;
-    align-items:center;
-    justify-content:center;
-    z-index:999;
-}
-
-.spinner{
-    width:60px;
-    height:60px;
-    border:6px solid #333;
-    border-top:6px solid var(--primary);
-    border-radius:50%;
-    animation:spin 1s linear infinite;
-}
-
-@keyframes spin{
-    100%{transform:rotate(360deg);}
-}
-
-/* =========================
-   EXAM LAYOUT
-========================= */
-
+/* EXAM */
 .exam{
     display:none;
-    height:calc(100vh - 60px);
+    padding:10px;
 }
 
 .layout{
     display:grid;
     grid-template-columns:1fr 280px;
-    height:100%;
+    gap:10px;
 }
 
 @media(max-width:900px){
     .layout{grid-template-columns:1fr;}
 }
 
-/* LEFT */
 .main{
-    padding:25px;
-    overflow:auto;
-}
-
-/* QUESTION CARD */
-.card{
     background:var(--card);
-    padding:25px;
-    border-radius:var(--radius);
-    backdrop-filter:blur(10px);
+    padding:20px;
+    border-radius:10px;
 }
 
-/* OPTIONS */
 .option{
-    padding:12px;
+    padding:10px;
     margin:8px 0;
-    background:#2a2a2a;
-    border-radius:8px;
+    background:#333;
+    border-radius:6px;
     cursor:pointer;
 }
-
-.option:hover{
-    background:var(--primary);
-    color:black;
-}
-
-.selected{
-    background:var(--primary);
-    color:black;
-}
-
-/* NAV */
-.nav{
-    display:flex;
-    justify-content:space-between;
-    margin-top:15px;
-}
+.option:hover{background:var(--primary);color:black}
+.selected{background:var(--primary);color:black}
 
 /* SIDEBAR */
 .sidebar{
-    padding:20px;
-    border-left:1px solid rgba(255,255,255,0.05);
+    background:var(--card);
+    padding:15px;
+    border-radius:10px;
 }
 
-/* TIMER */
 .timer{
-    font-size:1.4rem;
     text-align:center;
-    margin-bottom:15px;
+    font-size:1.3rem;
+    margin-bottom:10px;
 }
 
-/* PALETTE */
 .palette{
     display:grid;
     grid-template-columns:repeat(5,1fr);
-    gap:8px;
+    gap:5px;
 }
 
 .p{
-    padding:10px;
+    padding:8px;
     background:#222;
     text-align:center;
-    border-radius:6px;
     cursor:pointer;
 }
 
 .p.active{border:2px solid var(--primary)}
 .p.done{background:var(--primary);color:black}
 
-/* =========================
-   DASHBOARD
-========================= */
-
+/* RESULT */
 .dashboard{
     display:none;
-    padding:30px;
-}
-
-.stats{
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
-    gap:15px;
+    padding:20px;
 }
 
 .stat{
     background:var(--card);
-    padding:20px;
-    text-align:center;
-    border-radius:var(--radius);
+    padding:10px;
+    margin:10px 0;
 }
-
-canvas{
-    margin-top:25px;
-}
-
-/* =========================
-   ANIMATION
-========================= */
-
-.fade{
-    animation:fade 0.4s ease;
-}
-
-@keyframes fade{
-    from{opacity:0;transform:translateY(10px)}
-    to{opacity:1}
-}
-
 </style>
 </head>
 
 <body>
 
 <header>
-<div class="logo">AI Exam Ultra Pro X</div>
-<div class="theme-btn" onclick="toggleTheme()">🌗</div>
+<h3>AI Exam Pro</h3>
+<button onclick="toggleTheme()">🌗</button>
 </header>
 
 <!-- CONFIG -->
 <div class="config" id="config">
-<div class="input-group">
-<label>Topic</label>
+
+<label>📚 Topic</label>
 <input id="topic" placeholder="e.g. Percentage">
-</div>
 
-<div class="input-group">
-<label>Number of Questions</label>
-<input id="count" type="number" value="10">
-</div>
+<label>🔢 Number of Questions</label>
+<input id="count" type="number" min="1" max="100" value="10">
 
-<div class="input-group">
-<label>Time (minutes)</label>
-<input id="time" type="number" value="10">
-</div>
+<label>⏱ Time (minutes)</label>
+<input id="time" type="number" min="1" max="180" value="10">
 
-<button class="start-btn" onclick="startExam()">Start Exam</button>
-</div>
+<label>🎚 Difficulty</label>
+<select id="level">
+<option value="easy">Easy</option>
+<option value="medium" selected>Medium</option>
+<option value="hard">Hard</option>
+</select>
 
-<!-- LOADER -->
-<div class="loader" id="loader">
-<div class="spinner"></div>
-<p>Preparing your exam...</p>
+<button onclick="startExam()">Start Exam</button>
+
 </div>
 
 <!-- EXAM -->
 <div class="exam" id="exam">
+
 <div class="layout">
 
 <div class="main">
 <div id="qbox"></div>
 
-<div class="nav">
+<div style="margin-top:10px;">
 <button onclick="prev()">Prev</button>
 <button onclick="next()">Next</button>
 <button onclick="submitExam()">Submit</button>
@@ -332,82 +190,71 @@ canvas{
 </div>
 
 </div>
+
 </div>
 
-<!-- DASHBOARD -->
+<!-- RESULT -->
 <div class="dashboard" id="dash">
+<h2>Result</h2>
 
-<h2>Performance Dashboard</h2>
-
-<div class="stats">
 <div class="stat" id="score"></div>
 <div class="stat" id="accuracy"></div>
 <div class="stat" id="wrong"></div>
 <div class="stat" id="skip"></div>
-</div>
 
 <canvas id="chart"></canvas>
-
-<div id="insight"></div>
 
 </div>
 
 <script>
 
-/* =========================
-   STATE
-========================= */
-
 let quiz=[],i=0,ans=[],timeLeft,timerInt;
 
-/* =========================
-   THEME
-========================= */
-
+/* THEME */
 function toggleTheme(){
 document.body.classList.toggle("light");
 }
 
-/* =========================
-   START EXAM
-========================= */
-
+/* START */
 async function startExam(){
 
-loader.style.display="flex";
+let topicInput=document.getElementById("topic").value.trim();
+let count=parseInt(document.getElementById("count").value);
+let time=parseInt(document.getElementById("time").value);
+let level=document.getElementById("level").value;
 
-let topic=topic.value;
-let count=document.getElementById("count").value;
-let time=document.getElementById("time").value;
+/* VALIDATION */
+if(!topicInput){ alert("Enter topic"); return; }
+if(count<=0){ alert("Invalid question count"); return; }
+if(time<=0){ alert("Invalid time"); return; }
 
 timeLeft=time*60;
 
 try{
 
-let res=await fetch(`/api/quiz?topic=${topic}&count=${count}`);
+let res=await fetch(`/api/quiz?topic=${encodeURIComponent(topicInput)}&count=${count}&level=${level}`);
 quiz=await res.json();
 
-loader.style.display="none";
-config.style.display="none";
-exam.style.display="block";
+if(!Array.isArray(quiz)){
+alert("API error");
+return;
+}
 
 ans=new Array(quiz.length).fill(null);
+
+config.style.display="none";
+exam.style.display="block";
 
 buildPalette();
 showQ();
 startTimer();
 
 }catch(e){
-loader.style.display="none";
-alert("Error loading quiz");
+alert("Failed to load quiz");
+}
 }
 
-}
-
-/* =========================
-   TIMER
-========================= */
-
+/* TIMER */
 function startTimer(){
 timerInt=setInterval(()=>{
 timeLeft--;
@@ -418,32 +265,22 @@ if(timeLeft<=0)submitExam();
 },1000);
 }
 
-/* =========================
-   PALETTE
-========================= */
-
+/* PALETTE */
 function buildPalette(){
-let html="";
-quiz.forEach((_,x)=>{
-html+=`<div class="p" id="p${x}" onclick="jump(${x})">${x+1}</div>`;
-});
-palette.innerHTML=html;
+palette.innerHTML=quiz.map((_,x)=>`
+<div class="p" id="p${x}" onclick="jump(${x})">${x+1}</div>
+`).join("");
 }
 
-/* =========================
-   SHOW QUESTION
-========================= */
-
+/* SHOW */
 function showQ(){
 let q=quiz[i];
 
 qbox.innerHTML=`
-<div class="card fade">
 <h3>${i+1}. ${q.q}</h3>
 ${q.options.map((o,x)=>`
 <div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
 `).join("")}
-</div>
 `;
 
 document.querySelectorAll(".p").forEach(e=>e.classList.remove("active"));
@@ -454,23 +291,13 @@ if(a!=null) document.getElementById("p"+x).classList.add("done");
 });
 }
 
-/* =========================
-   ACTIONS
-========================= */
-
-function select(x){
-ans[i]=x;
-showQ();
-}
-
+/* ACTION */
+function select(x){ ans[i]=x; showQ(); }
 function next(){ if(i<quiz.length-1){i++;showQ();}}
 function prev(){ if(i>0){i--;showQ();}}
 function jump(x){i=x;showQ();}
 
-/* =========================
-   RESULT
-========================= */
-
+/* RESULT */
 function submitExam(){
 
 clearInterval(timerInt);
@@ -500,11 +327,6 @@ labels:["Correct","Wrong","Skipped"],
 datasets:[{data:[correct,wrong,skip]}]
 }
 });
-
-insight.innerText =
-acc>80?"🔥 Excellent":
-acc>50?"👍 Good":
-"⚠️ Improve";
 
 }
 
