@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Exam Pro</title>
+    <style>
+        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
+        .container { max-width: 800px; margin: auto; }
+        input { padding: 12px; width: 60%; border-radius: 5px; border: none; background: #222; color: white; }
+        button { padding: 12px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
+        .quiz-card { background: #1e1e1e; padding: 20px; border-radius: 10px; text-align: left; margin-top: 20px; border-left: 5px solid #4CAF50; }
+        .option { display: block; padding: 10px; margin: 5px 0; background: #2a2a2a; border-radius: 5px; cursor: pointer; }
+        .correct { background: #2e7d32 !important; }
+        .wrong { background: #c62828 !important; }
+        #result { font-size: 1.5rem; margin: 20px; color: #4CAF50; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>AI Exam Pro</h1>
+        <input type="text" id="topic" value="SSC General Awareness">
+        <button id="genBtn" onclick="fetchQuiz()">Generate</button>
+        
+        <div id="status"></div>
+        <div id="quiz-box"></div>
+        
+        <div id="result" class="hidden"></div>
+        <button id="subBtn" class="hidden" onclick="submitQuiz()">Submit Quiz</button>
+    </div>
+
+    <script>
+        let currentQuiz = [];
+
+        async function fetchQuiz() {
+            const topic = document.getElementById('topic').value;
+            const status = document.getElementById('status');
+            const box = document.getElementById('quiz-box');
+            
+            status.innerText = "⏳ Generating...";
+            box.innerHTML = "";
+            document.getElementById('result').classList.add('hidden');
+
+            try {
+                // Ensure the path matches the backend route exactly
+                const res = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}`);
+                const data = await res.json();
+                
+                if (data.error) throw new Error(data.error);
+
+                currentQuiz = data;
+                status.innerText = "";
+                
+                data.forEach((q, i) => {
+                    const div = document.createElement('div');
+                    div.className = 'quiz-card';
+                    div.innerHTML = `<strong>${i+1}. ${q.q}</strong>` + 
+                        q.options.map((opt, optIdx) => `
+                            <label class="option" id="label-${i}-${optIdx}">
+                                <input type="radio" name="q${i}" value="${optIdx}"> ${opt}
+                            </label>
+                        `).join('');
+                    box.appendChild(div);
+                });
+
+                document.getElementById('subBtn').classList.remove('hidden');
+            } catch (err) {
+                status.innerText = "❌ Error: " + err.message;
+            }
+        }
+
+        function submitQuiz() {
+            let score = 0;
+            currentQuiz.forEach((q, i) => {
+                const selected = document.querySelector(`input[name="q${i}"]:checked`);
+                const correctLabel = document.getElementById(`label-${i}-${q.correct}`);
+                
+                correctLabel.classList.add('correct'); // Show correct answer
+
+                if (selected) {
+                    if (parseInt(selected.value) === q.correct) {
+                        score++;
+                    } else {
+                        document.getElementById(`label-${i}-${selected.value}`).classList.add('wrong');
+                    }
+                }
+            });
+
+            const resDiv = document.getElementById('result');
+            resDiv.innerText = `Final Score: ${score} / ${currentQuiz.length}`;
+            resDiv.classList.remove('hidden');
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
