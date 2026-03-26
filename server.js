@@ -12,7 +12,8 @@ app.use(cors());
 app.use(express.json());
 
 // 1. Setup Static Path
-const frontendPath = fs.existsSync(path.join(__dirname, 'frontend')) 
+// Detects if index.html is in /frontend or the root folder
+const frontendPath = fs.existsSync(path.join(__dirname, 'frontend', 'index.html')) 
     ? path.join(__dirname, 'frontend') 
     : __dirname;
 
@@ -55,14 +56,20 @@ app.get('/api/quiz', async (req, res) => {
     }
 });
 
-// 4. FIX: The Wildcard Route for Express 5.0+
-// Instead of '*', we use '(.*)' to catch all frontend routes
-app.get('(.*)', (req, res) => {
+// 4. THE ULTIMATE FIX: Middleware Fallback
+// This does NOT use the app.get('*') router, so it won't trigger the PathError.
+app.use((req, res, next) => {
+    // If the request is for an API, let it pass (or 404 if not found)
+    if (req.path.startsWith('/api')) {
+        return res.status(404).json({ error: "API route not found" });
+    }
+
+    // Otherwise, serve the index.html file
     const file = path.join(frontendPath, 'index.html');
     if (fs.existsSync(file)) {
         res.sendFile(file);
     } else {
-        res.status(404).send("index.html not found. Check your file structure.");
+        res.status(404).send("index.html not found. Please ensure your file is in the root or /frontend folder.");
     }
 });
 
