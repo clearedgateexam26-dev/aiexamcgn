@@ -1,121 +1,244 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Exam Pro + Explanations</title>
-    <style>
-        body { font-family: sans-serif; background: #121212; color: white; text-align: center; padding: 20px; }
-        .container { max-width: 800px; margin: auto; }
-        input { padding: 12px; width: 60%; border-radius: 5px; border: none; background: #222; color: white; }
-        button { padding: 12px 20px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; margin: 5px; }
-        .quiz-card { background: #1e1e1e; padding: 20px; border-radius: 10px; text-align: left; margin-top: 20px; border-left: 5px solid #4CAF50; }
-        .option { display: block; padding: 10px; margin: 5px 0; background: #2a2a2a; border-radius: 5px; cursor: pointer; }
-        .correct { background: #2e7d32 !important; }
-        .wrong { background: #c62828 !important; }
-        
-        /* New Style for Explanation */
-        .explanation { 
-            margin-top: 15px; 
-            padding: 10px; 
-            background: #333; 
-            border-radius: 5px; 
-            border-left: 3px solid #ff9800; 
-            display: none; /* Hidden by default */
-            font-size: 0.9rem;
-            color: #ddd;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exam Pro MAX</title>
 
-        #result { font-size: 1.5rem; margin: 20px; color: #4CAF50; }
-        .hidden { display: none; }
-    </style>
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+    color: white;
+}
+
+/* Container */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Header */
+h1 {
+    text-align: center;
+    color: #00e5ff;
+}
+
+/* Input */
+.input-box {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+
+input {
+    padding: 12px;
+    width: 60%;
+    border-radius: 8px;
+    border: none;
+    outline: none;
+    background: #1e1e1e;
+    color: white;
+}
+
+button {
+    padding: 12px 18px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    background: #00e5ff;
+    color: black;
+    font-weight: bold;
+}
+
+/* Quiz Card */
+.quiz-card {
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 15px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(10px);
+}
+
+/* Options */
+.option {
+    display: block;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    background: #2a2a2a;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.option:hover {
+    background: #00e5ff;
+    color: black;
+}
+
+/* States */
+.correct { background: #2e7d32 !important; }
+.wrong { background: #c62828 !important; }
+
+/* Progress Bar */
+.progress {
+    height: 10px;
+    background: #333;
+    border-radius: 10px;
+    margin: 20px 0;
+}
+
+.progress-bar {
+    height: 100%;
+    width: 0%;
+    background: #00e5ff;
+    border-radius: 10px;
+}
+
+/* Timer */
+.timer {
+    text-align: right;
+    font-size: 1.2rem;
+    color: #ff9800;
+}
+
+/* Explanation */
+.explanation {
+    margin-top: 15px;
+    padding: 10px;
+    background: #333;
+    border-left: 3px solid orange;
+    display: none;
+}
+
+/* Result */
+#result {
+    text-align: center;
+    font-size: 1.5rem;
+    margin-top: 20px;
+}
+
+/* Navigation */
+.nav-btns {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 15px;
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <h1>AI Exam Pro</h1>
-        <input type="text" id="topic" value="SSC General Awareness">
-        <button id="genBtn" onclick="fetchQuiz()">Generate</button>
-        
-        <div id="status"></div>
-        <div id="quiz-box"></div>
-        
-        <div id="result" class="hidden"></div>
-        <button id="subBtn" class="hidden" onclick="submitQuiz()">Submit Quiz</button>
-    </div>
+<div class="container">
 
-    <script>
-        let currentQuiz = [];
+<h1>🚀 AI Exam Pro MAX</h1>
 
-        async function fetchQuiz() {
-            const topic = document.getElementById('topic').value;
-            const status = document.getElementById('status');
-            const box = document.getElementById('quiz-box');
-            
-            status.innerText = "⏳ Generating...";
-            box.innerHTML = "";
-            document.getElementById('result').classList.add('hidden');
-            document.getElementById('subBtn').classList.add('hidden');
+<div class="input-box">
+    <input id="topic" placeholder="Enter topic (e.g. Percentage)">
+    <button onclick="fetchQuiz()">Start</button>
+</div>
 
-            try {
-                const res = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}`);
-                const data = await res.json();
-                
-                if (data.error) throw new Error(data.error);
+<div class="timer" id="timer"></div>
+<div class="progress"><div class="progress-bar" id="progress"></div></div>
 
-                currentQuiz = data;
-                status.innerText = "";
-                
-                data.forEach((q, i) => {
-                    const div = document.createElement('div');
-                    div.className = 'quiz-card';
-                    div.innerHTML = `
-                        <strong>${i+1}. ${q.q}</strong>
-                        ${q.options.map((opt, optIdx) => `
-                            <label class="option" id="label-${i}-${optIdx}">
-                                <input type="radio" name="q${i}" value="${optIdx}"> ${opt}
-                            </label>
-                        `).join('')}
-                        <div class="explanation" id="exp-${i}">
-                            <strong>Explanation:</strong> ${q.explanation || "No explanation provided."}
-                        </div>
-                    `;
-                    box.appendChild(div);
-                });
+<div id="quiz-box"></div>
 
-                document.getElementById('subBtn').classList.remove('hidden');
-            } catch (err) {
-                status.innerText = "❌ Error: " + err.message;
-            }
-        }
+<div class="nav-btns">
+    <button onclick="prevQ()">⬅ Prev</button>
+    <button onclick="nextQ()">Next ➡</button>
+</div>
 
-        function submitQuiz() {
-            let score = 0;
-            currentQuiz.forEach((q, i) => {
-                const selected = document.querySelector(`input[name="q${i}"]:checked`);
-                const correctLabel = document.getElementById(`label-${i}-${q.correct}`);
-                const expDiv = document.getElementById(`exp-${i}`);
-                
-                // Show the explanation
-                expDiv.style.display = 'block';
-                
-                // Show correct answer in green
-                correctLabel.classList.add('correct'); 
+<button onclick="submitQuiz()">Submit</button>
 
-                if (selected) {
-                    if (parseInt(selected.value) === q.correct) {
-                        score++;
-                    } else {
-                        // Show user's wrong answer in red
-                        document.getElementById(`label-${i}-${selected.value}`).classList.add('wrong');
-                    }
-                }
-            });
+<div id="result"></div>
 
-            const resDiv = document.getElementById('result');
-            resDiv.innerText = `Final Score: ${score} / ${currentQuiz.length}`;
-            resDiv.classList.remove('hidden');
-            window.scrollTo(0, 0);
-        }
-    </script>
+</div>
+
+<script>
+let quiz = [];
+let current = 0;
+let answers = [];
+let time = 600;
+let timerInterval;
+
+function startTimer() {
+    timerInterval = setInterval(() => {
+        time--;
+        document.getElementById("timer").innerText = "⏱ " + time + " sec";
+        if (time <= 0) submitQuiz();
+    }, 1000);
+}
+
+async function fetchQuiz() {
+    const topic = document.getElementById("topic").value;
+
+    const res = await fetch(`/api/quiz?topic=${topic}`);
+    quiz = await res.json();
+
+    answers = new Array(quiz.length).fill(null);
+    current = 0;
+
+    startTimer();
+    showQuestion();
+}
+
+function showQuestion() {
+    const q = quiz[current];
+
+    document.getElementById("quiz-box").innerHTML = `
+        <div class="quiz-card">
+            <h3>${current + 1}. ${q.q}</h3>
+            ${q.options.map((opt, i) => `
+                <label class="option">
+                    <input type="radio" name="opt" value="${i}"
+                        ${answers[current] === i ? "checked" : ""}
+                        onchange="selectAnswer(${i})"> ${opt}
+                </label>
+            `).join("")}
+            <div class="explanation" id="exp">${q.explanation}</div>
+        </div>
+    `;
+
+    document.getElementById("progress").style.width =
+        ((current + 1) / quiz.length) * 100 + "%";
+}
+
+function selectAnswer(i) {
+    answers[current] = i;
+}
+
+function nextQ() {
+    if (current < quiz.length - 1) {
+        current++;
+        showQuestion();
+    }
+}
+
+function prevQ() {
+    if (current > 0) {
+        current--;
+        showQuestion();
+    }
+}
+
+function submitQuiz() {
+    clearInterval(timerInterval);
+
+    let score = 0;
+
+    quiz.forEach((q, i) => {
+        if (answers[i] === q.correct) score++;
+    });
+
+    document.getElementById("result").innerText =
+        `🎯 Score: ${score} / ${quiz.length}`;
+
+    // show explanation
+    document.querySelectorAll(".explanation").forEach(e => {
+        e.style.display = "block";
+    });
+}
+</script>
 </body>
 </html>
