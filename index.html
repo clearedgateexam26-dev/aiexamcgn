@@ -3,302 +3,277 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Exam Pro ULTRA</title>
+<title>AI Exam Config Pro</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
 
 <style>
-:root {
-    --bg:#0b0e14;
-    --card:rgba(255,255,255,0.05);
+:root{
     --primary:#00e5ff;
-    --accent:#4facfe;
+    --bg:#0b0e14;
+    --card:#111;
 }
 
-body {
+body{
     margin:0;
-    font-family: 'Inter', sans-serif;
-    background: radial-gradient(circle at top,#16222a,#0b0e14);
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
     color:white;
 }
 
 /* HEADER */
-header {
-    position: sticky;
-    top:0;
-    backdrop-filter: blur(15px);
-    background: rgba(0,0,0,0.4);
-    padding:15px 20px;
-    display:flex;
-    justify-content:space-between;
-    z-index:10;
-}
-
-.logo {
+header{
+    padding:15px;
+    text-align:center;
+    font-size:1.5rem;
     font-weight:800;
-    font-size:1.4rem;
-    background:linear-gradient(to right,var(--primary),var(--accent));
+    background:linear-gradient(90deg,#00e5ff,#4facfe);
     -webkit-background-clip:text;
     -webkit-text-fill-color:transparent;
 }
 
-/* SEARCH */
-.search {
-    display:flex;
-    gap:10px;
-    margin:30px auto;
+/* CONFIG BOX */
+.config{
     max-width:600px;
-}
-.search input {
-    flex:1;
-    padding:14px;
-    border-radius:12px;
-    border:none;
-    background:#1e1e1e;
-    color:white;
-}
-.search button {
-    padding:14px 25px;
-    border:none;
-    border-radius:12px;
-    background:var(--primary);
-    font-weight:bold;
+    margin:40px auto;
+    background:var(--card);
+    padding:30px;
+    border-radius:15px;
 }
 
-/* LAYOUT */
-.layout {
+label{
+    font-size:0.9rem;
+    opacity:0.7;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin:8px 0 15px;
+    border:none;
+    border-radius:8px;
+    background:#222;
+    color:white;
+}
+
+/* Toggle */
+.toggle{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:#222;
+    padding:10px;
+    border-radius:8px;
+}
+
+.switch{
+    position:relative;
+    width:50px;height:25px;
+}
+.switch input{display:none;}
+.slider{
+    position:absolute;
+    cursor:pointer;
+    background:#555;
+    border-radius:25px;
+    top:0;left:0;right:0;bottom:0;
+}
+.slider:before{
+    content:"";
+    position:absolute;
+    height:20px;width:20px;
+    left:3px;top:2px;
+    background:white;
+    border-radius:50%;
+    transition:0.3s;
+}
+input:checked + .slider{
+    background:var(--primary);
+}
+input:checked + .slider:before{
+    transform:translateX(24px);
+}
+
+/* BUTTON */
+button{
+    width:100%;
+    padding:14px;
+    background:var(--primary);
+    border:none;
+    border-radius:10px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+/* EXAM */
+.exam{
     display:none;
-    grid-template-columns:1fr 300px;
-    gap:20px;
-    max-width:1200px;
-    margin:auto;
     padding:20px;
 }
 
-@media(max-width:900px){
-    .layout{grid-template-columns:1fr;}
-}
-
-/* CARD */
-.card {
-    background:var(--card);
-    backdrop-filter: blur(15px);
-    border-radius:20px;
-    padding:30px;
-    animation:fade 0.4s ease;
-}
-
-@keyframes fade{
-    from{opacity:0;transform:translateY(20px)}
-    to{opacity:1}
-}
-
-/* OPTIONS */
-.option {
-    padding:15px;
-    margin:10px 0;
+.card{
+    background:#1e1e1e;
+    padding:20px;
     border-radius:12px;
-    background:#2a2a2a;
-    cursor:pointer;
-}
-.option:hover {
-    background:var(--primary);
-    color:black;
-}
-.selected {background:var(--primary);color:black;}
-.correct {background:green !important;}
-.wrong {background:red !important;}
-
-/* SIDEBAR */
-.sidebar {
-    display:flex;
-    flex-direction:column;
-    gap:20px;
 }
 
-/* TIMER CIRCLE */
-.timer {
-    width:120px;
-    height:120px;
-    border-radius:50%;
-    border:6px solid var(--primary);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:1.5rem;
-    margin:auto;
-}
-
-/* PALETTE */
-.palette {
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:8px;
-}
-.p {
+.option{
     padding:10px;
-    background:#222;
-    text-align:center;
+    margin:8px 0;
+    background:#333;
     border-radius:8px;
     cursor:pointer;
 }
-.p.active{border:2px solid cyan;}
-.p.answered{background:cyan;color:black;}
-.p.flag{background:orange;color:black;}
+.selected{
+    background:var(--primary);
+    color:black;
+}
 
-/* FOOTER NAV */
-.nav {
+/* TOP BAR */
+.top{
     display:flex;
     justify-content:space-between;
-    margin-top:20px;
+    margin-bottom:10px;
 }
 
-/* RESULT */
-.result {
-    text-align:center;
-    display:none;
-    padding:40px;
-}
-.score {
-    font-size:3rem;
-    font-weight:800;
+/* RESPONSIVE */
+@media(max-width:600px){
+    .config{margin:20px;}
 }
 </style>
 </head>
 
 <body>
 
-<header>
-<div class="logo">AI Exam ULTRA</div>
-<button onclick="toggleTheme()">🌗</button>
-</header>
+<header>AI Exam Setup Pro</header>
 
-<div class="search">
-<input id="topic" placeholder="Enter topic (Banking, SSC, UPSC)">
-<button onclick="start()">Start</button>
+<!-- CONFIG -->
+<div class="config" id="configBox">
+
+<label>📚 Topic</label>
+<input id="topic" placeholder="e.g. Percentage">
+
+<label>🔢 Number of Questions</label>
+<input type="number" id="count" value="10">
+
+<label>⏱ Time (minutes)</label>
+<input type="number" id="time" value="10">
+
+<label>📄 Previous Year Questions</label>
+<div class="toggle">
+    <span>Include PYQs</span>
+    <label class="switch">
+        <input type="checkbox" id="pyq">
+        <span class="slider"></span>
+    </label>
 </div>
 
-<div class="layout" id="layout">
-
-<div>
-<div id="qbox"></div>
-
-<div class="nav">
-<button onclick="prev()">⬅</button>
-<button onclick="flag()">🚩</button>
-<button onclick="next()">➡</button>
-<button onclick="submit()">Submit</button>
-</div>
-</div>
-
-<div class="sidebar">
-<div class="timer" id="timer">600</div>
-<div class="palette" id="pal"></div>
-</div>
+<br>
+<button onclick="startExam()">Start Exam</button>
 
 </div>
 
-<div class="result" id="res"></div>
+<!-- EXAM -->
+<div class="exam" id="examBox">
+
+<div class="top">
+<div id="qno"></div>
+<div id="timer"></div>
+</div>
+
+<div id="question"></div>
+
+<button onclick="prev()">Prev</button>
+<button onclick="next()">Next</button>
+<button onclick="submitExam()">Submit</button>
+
+</div>
 
 <script>
-let quiz=[],i=0,ans=[],flagged=[],t=600,interval;
 
-function toggleTheme(){
-document.body.classList.toggle("light");
+let quiz=[],i=0,answers=[],timeLeft,interval;
+
+/* START */
+async function startExam(){
+    let topic=document.getElementById("topic").value;
+    let count=document.getElementById("count").value;
+    let time=document.getElementById("time").value;
+    let pyq=document.getElementById("pyq").checked;
+
+    timeLeft=time*60;
+
+    let res=await fetch(`/api/quiz?topic=${topic}&count=${count}&pyq=${pyq}`);
+    quiz=await res.json();
+
+    answers=new Array(quiz.length).fill(null);
+
+    document.getElementById("configBox").style.display="none";
+    document.getElementById("examBox").style.display="block";
+
+    showQ();
+    startTimer();
 }
 
-async function start(){
-let topic=document.getElementById("topic").value;
-
-let r=await fetch(`/api/quiz?topic=${topic}`);
-quiz=await r.json();
-
-ans=new Array(quiz.length).fill(null);
-flagged=new Array(quiz.length).fill(false);
-
-document.querySelector(".layout").style.display="grid";
-
-buildPal();
-show();
-timer();
+/* TIMER */
+function startTimer(){
+    interval=setInterval(()=>{
+        timeLeft--;
+        let m=Math.floor(timeLeft/60);
+        let s=timeLeft%60;
+        document.getElementById("timer").innerText=`${m}:${s<10?"0":""}${s}`;
+        if(timeLeft<=0) submitExam();
+    },1000);
 }
 
-function timer(){
-interval=setInterval(()=>{
-t--;
-document.getElementById("timer").innerText=t;
-if(t<=0)submit();
-},1000);
-}
+/* SHOW QUESTION */
+function showQ(){
+    let q=quiz[i];
 
-function buildPal(){
-let html="";
-quiz.forEach((_,x)=>{
-html+=`<div class="p" id="p${x}" onclick="jump(${x})">${x+1}</div>`;
-});
-pal.innerHTML=html;
-}
+    document.getElementById("qno").innerText=`Q ${i+1}/${quiz.length}`;
 
-function show(){
-let q=quiz[i];
-
-qbox.innerHTML=`
-<div class="card">
-<h3>${i+1}. ${q.q}</h3>
-${q.options.map((o,x)=>`
-<div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
-`).join("")}
-<div class="explanation">${q.explanation}</div>
-</div>
-`;
-
-document.querySelectorAll(".p").forEach(e=>e.classList.remove("active"));
-document.getElementById("p"+i).classList.add("active");
-
-ans.forEach((a,x)=>{
-if(a!=null) document.getElementById("p"+x).classList.add("answered");
-if(flagged[x]) document.getElementById("p"+x).classList.add("flag");
-});
+    document.getElementById("question").innerHTML=`
+    <div class="card">
+        <h3>${q.q}</h3>
+        ${q.options.map((o,x)=>`
+            <div class="option ${answers[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
+        `).join("")}
+    </div>
+    `;
 }
 
 function select(x){
-ans[i]=x;
-show();
+    answers[i]=x;
+    showQ();
 }
 
-function next(){ if(i<quiz.length-1){i++;show();}}
-function prev(){ if(i>0){i--;show();}}
-function jump(x){i=x;show();}
+function next(){ if(i<quiz.length-1){i++;showQ();}}
+function prev(){ if(i>0){i--;showQ();}}
 
-function flag(){
-flagged[i]=!flagged[i];
-show();
+/* RESULT */
+function submitExam(){
+    clearInterval(interval);
+
+    let score=0;
+    let html="<h2>Result + Explanation</h2>";
+
+    quiz.forEach((q,x)=>{
+        if(answers[x]==q.correct) score++;
+
+        html+=`
+        <div class="card">
+        <b>Q${x+1}. ${q.q}</b><br>
+        Your: ${answers[x]!=null?q.options[answers[x]]:"Not Attempted"}<br>
+        Correct: ${q.options[q.correct]}<br>
+        <small>${q.explanation}</small>
+        </div>
+        `;
+    });
+
+    html=`<h2>Score: ${score}/${quiz.length}</h2>` + html;
+
+    document.getElementById("examBox").innerHTML=html;
 }
 
-function submit(){
-clearInterval(interval);
-
-let c=0,w=0,s=0;
-
-quiz.forEach((q,x)=>{
-if(ans[x]==null)s++;
-else if(ans[x]==q.correct)c++;
-else w++;
-});
-
-let acc=((c/quiz.length)*100).toFixed(1);
-
-layout.style.display="none";
-res.style.display="block";
-
-res.innerHTML=`
-<div class="score">${acc}%</div>
-<p>Correct: ${c}</p>
-<p>Wrong: ${w}</p>
-<p>Skipped: ${s}</p>
-<button onclick="location.reload()">Restart</button>
-`;
-}
 </script>
 
 </body>
