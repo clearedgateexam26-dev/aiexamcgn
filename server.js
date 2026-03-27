@@ -6,75 +6,56 @@ const fs = require('fs');
 const OpenAI = require("openai");
 
 const app = express();
-
-// Middlewares
 app.use(cors());
 app.use(express.json());
 
-// 1. Setup Static Path
-// Detects if index.html is in /frontend or the root folder
-const frontendPath = fs.existsSync(path.join(__dirname, 'frontend', 'index.html')) 
-    ? path.join(__dirname, 'frontend') 
-    : __dirname;
+// ✅ STEP 1: SMART PATH DETECTION
+// This checks if 'frontend' folder exists. If not, it uses the current folder.
+let frontendPath = path.join(__dirname, 'frontend');
+if (!fs.existsSync(frontendPath)) {
+    frontendPath = __dirname; 
+}
+console.log("📂 Serving frontend from:", frontendPath);
 
 app.use(express.static(frontendPath));
 
-// 2. Initialize OpenAI (GitHub Models)
+// ✅ STEP 2: GITHUB MODELS
 const client = new OpenAI({
   baseURL: "https://models.inference.ai.azure.com",
-  apiKey: process.env.GITHUB_TOKEN || "missing_token", 
+  apiKey: process.env.GITHUB_TOKEN, 
 });
 
-// 3. Quiz API Route
+// ✅ STEP 3: API ROUTE
 app.get('/api/quiz', async (req, res) => {
     const topic = req.query.topic || "General Knowledge";
-    
     try {
         const response = await client.chat.completions.create({
             messages: [
-                { 
-                    role: "system", 
-                    content: "Return ONLY a raw JSON array. No markdown. Format: [{\"q\":\"text\",\"options\":[\"A\",\"B\",\"C\",\"D\"],\"correct\":0,\"explanation\":\"text\"}]" 
-                },
-                { 
-                    role: "user", 
-                    content: `Generate 10 MCQs for ${topic} with detailed explanations.` 
-                }
+                { role: "system", content: "Return ONLY a raw JSON array. No markdown." },
+                { role: "user", content: `Generate 10 MCQs for ${topic}. Format: [{"q":"text","options":["A","B","C","D"],"correct":0,"explanation":"text"}]` }
             ],
-            model: "gpt-4o",
-            temperature: 0.7
+            model: "gpt-4o", 
         });
 
-        let text = response.choices[0].message.content.trim();
-        text = text.replace(/```json|```/gi, "").trim();
-        
-        const quizData = JSON.parse(text);
-        res.json(quizData);
+        const text = response.choices[0].message.content.replace(/```json|```/gi, "").trim();
+        res.json(JSON.parse(text));
     } catch (error) {
         console.error("❌ API Error:", error.message);
-        res.status(500).json({ error: "AI failed to generate quiz." });
+        res.status(500).json({ error: "AI failed to generate" });
     }
 });
 
-// 4. THE ULTIMATE FIX: Middleware Fallback
-// This does NOT use the app.get('*') router, so it won't trigger the PathError.
+// ✅ STEP 4: FALLBACK ROUTE
 app.use((req, res, next) => {
-    // If the request is for an API, let it pass (or 404 if not found)
-    if (req.path.startsWith('/api')) {
-        return res.status(404).json({ error: "API route not found" });
-    }
-
-    // Otherwise, serve the index.html file
-    const file = path.join(frontendPath, 'index.html');
-    if (fs.existsSync(file)) {
-        res.sendFile(file);
+    if (req.path.startsWith('/api')) return next();
+    
+    const indexPath = path.join(frontendPath, 'index.html');
+    if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
     } else {
-        res.status(404).send("index.html not found. Please ensure your file is in the root or /frontend folder.");
+        res.status(404).send("Error: index.html not found in " + frontendPath);
     }
 });
 
-// 5. Port Binding
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, '0.0.0.0', () => {
-    console.log(`🚀 Server live on port ${PORT}`);
-});
+app.listen(PORT, () => console.log(`🚀 Server live on port ${PORT}`));
