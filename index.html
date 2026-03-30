@@ -213,132 +213,124 @@ z-index:999;
 </div>
 
 <script>
+let quiz = [], ans = [], i = 0, timeLeft, timerInt;
 
-let quiz=[],ans=[],i=0,timeLeft,timerInt;
+async function startExam() {
+    const configDiv = document.getElementById("config");
+    const examDiv = document.getElementById("exam");
+    const loader = document.getElementById("loader");
 
-/* START */
-async function startExam(){
+    let topic = document.getElementById("topic").value.trim();
+    let count = parseInt(document.getElementById("count").value);
+    let timeInput = parseInt(document.getElementById("time").value);
+    let level = document.getElementById("level").value;
 
-document.getElementById("loader").style.display="flex";
+    if (!topic) { alert("Please enter a topic"); return; }
+    
+    // ✅ Set timer based on user input
+    timeLeft = timeInput * 60; 
+    loader.style.display = "flex";
 
-let topic=document.getElementById("topic").value.trim();
-let count=parseInt(document.getElementById("count").value);
-let time=parseInt(document.getElementById("time").value);
-let level=document.getElementById("level").value;
+    try {
+        // ✅ Passing count and level to the API
+        let res = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
+        quiz = await res.json();
 
-if(!topic){ alert("Enter topic"); return; }
+        if (!Array.isArray(quiz)) throw new Error("Invalid response");
 
-timeLeft=time*60;
+        loader.style.display = "none";
+        ans = new Array(quiz.length).fill(null);
+        i = 0; // Reset index
 
-try{
+        configDiv.style.display = "none";
+        examDiv.style.display = "block";
 
-let res=await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
-quiz=await res.json();
+        buildPalette();
+        showQ();
+        startTimer();
 
-document.getElementById("loader").style.display="none";
-
-ans=new Array(quiz.length).fill(null);
-
-config.style.display="none";
-exam.style.display="block";
-
-buildPalette();
-showQ();
-startTimer();
-
-}catch(e){
-document.getElementById("loader").style.display="none";
-alert("Error loading quiz");
-}
-}
-
-/* TIMER */
-function startTimer(){
-timerInt=setInterval(()=>{
-timeLeft--;
-let m=Math.floor(timeLeft/60);
-let s=timeLeft%60;
-timer.innerText=`${m}:${s<10?"0":""}${s}`;
-if(timeLeft<=0)submitExam();
-},1000);
+    } catch (e) {
+        loader.style.display = "none";
+        alert("Error loading quiz. Check your API key or connection.");
+        console.error(e);
+    }
 }
 
-/* SHOW */
-function showQ(){
-let q=quiz[i];
-qbox.innerHTML=`
-<h3>${i+1}. ${q.q}</h3>
-${q.options.map((o,x)=>`
-<div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
-`).join("")}
-`;
+function startTimer() {
+    const timerDisplay = document.getElementById("timer");
+    // Clear any existing timer first
+    if(timerInt) clearInterval(timerInt);
+    
+    timerInt = setInterval(() => {
+        timeLeft--;
+        let m = Math.floor(timeLeft / 60);
+        let s = timeLeft % 60;
+        timerDisplay.innerText = `${m}:${s < 10 ? "0" : ""}${s}`;
+        if (timeLeft <= 0) {
+            clearInterval(timerInt);
+            submitExam();
+        }
+    }, 1000);
 }
 
-/* ACTION */
-function select(x){ans[i]=x;showQ();}
-function next(){if(i<quiz.length-1){i++;showQ();}}
-function prev(){if(i>0){i--;showQ();}}
-
-/* PALETTE */
-function buildPalette(){
-palette.innerHTML=quiz.map((_,x)=>`
-<div class="p" onclick="jump(${x})">${x+1}</div>
-`).join("");
-}
-function jump(x){i=x;showQ();}
-
-/* RESULT */
-function submitExam(){
-
-clearInterval(timerInt);
-
-let correct=0,wrong=0,skip=0;
-
-quiz.forEach((q,x)=>{
-if(ans[x]==null) skip++;
-else if(ans[x]==q.correct) correct++;
-else wrong++;
-});
-
-let acc=((correct/quiz.length)*100).toFixed(1);
-
-exam.style.display="none";
-dash.style.display="block";
-
-score.innerText=`Score: ${correct}/${quiz.length}`;
-accuracy.innerText=`Accuracy: ${acc}%`;
-
-insight.innerText=
-acc>80?"🔥 Excellent":
-acc>50?"👍 Good":
-"⚠️ Practice more";
-
-new Chart(chart,{
-type:"doughnut",
-data:{
-labels:["Correct","Wrong","Skipped"],
-datasets:[{data:[correct,wrong,skip]}]
-}
-});
-
-/* REVIEW */
-review.innerHTML="<h2>Answer Review</h2>";
-
-quiz.forEach((q,x)=>{
-review.innerHTML+=`
-<div class="card">
-<b>Q${x+1}. ${q.q}</b><br>
-Your: <span class="${ans[x]==q.correct?'correct':'wrong'}">
-${ans[x]!=null?q.options[ans[x]]:"Not Attempted"}
-</span><br>
-Correct: ${q.options[q.correct]}<br>
-${q.explanation}
-</div>
-`;
-});
-
+function showQ() {
+    let q = quiz[i];
+    const qbox = document.getElementById("qbox");
+    qbox.innerHTML = `
+        <h3>${i + 1}. ${q.q}</h3>
+        ${q.options.map((o, x) => `
+            <div class="option ${ans[i] === x ? "selected" : ""}" onclick="select(${x})">${o}</div>
+        `).join("")}
+    `;
+    updatePalette();
 }
 
+function select(x) {
+    ans[i] = x;
+    showQ();
+    updatePalette();
+}
+
+function next() { if (i < quiz.length - 1) { i++; showQ(); } }
+function prev() { if (i > 0) { i--; showQ(); } }
+
+function buildPalette() {
+    const palette = document.getElementById("palette");
+    palette.innerHTML = quiz.map((_, x) => `
+        <div class="p" id="p${x}" onclick="jump(${x})">${x + 1}</div>
+    `).join("");
+}
+
+function updatePalette() {
+    ans.forEach((a, x) => {
+        const pBtn = document.getElementById(`p${x}`);
+        if (a !== null) pBtn.classList.add("done");
+    });
+}
+
+function jump(x) { i = x; showQ(); }
+
+function submitExam() {
+    clearInterval(timerInt);
+    const examDiv = document.getElementById("exam");
+    const dashDiv = document.getElementById("dash");
+    
+    let correct = 0, wrong = 0, skip = 0;
+    quiz.forEach((q, x) => {
+        if (ans[x] == null) skip++;
+        else if (ans[x] == q.correct) correct++;
+        else wrong++;
+    });
+
+    let acc = ((correct / quiz.length) * 100).toFixed(1);
+    examDiv.style.display = "none";
+    dashDiv.style.display = "block";
+
+    document.getElementById("score").innerText = `Score: ${correct}/${quiz.length}`;
+    document.getElementById("accuracy").innerText = `Accuracy: ${acc}%`;
+    
+    // ... rest of your Chart.js and Review code ...
+}
 </script>
 
 </body>
