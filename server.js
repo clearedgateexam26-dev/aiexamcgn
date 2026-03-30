@@ -9,30 +9,34 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ✅ STEP 1: SMART PATH DETECTION
-// This checks if 'frontend' folder exists. If not, it uses the current folder.
 let frontendPath = path.join(__dirname, 'frontend');
 if (!fs.existsSync(frontendPath)) {
     frontendPath = __dirname; 
 }
-console.log("📂 Serving frontend from:", frontendPath);
 
 app.use(express.static(frontendPath));
 
-// ✅ STEP 2: GITHUB MODELS
 const client = new OpenAI({
   baseURL: "https://models.inference.ai.azure.com",
   apiKey: process.env.GITHUB_TOKEN, 
 });
 
-// ✅ STEP 3: API ROUTE
 app.get('/api/quiz', async (req, res) => {
+    // ✅ Now capturing count and level from the frontend
     const topic = req.query.topic || "General Knowledge";
+    const count = req.query.count || 10;
+    const level = req.query.level || "medium";
+
     try {
         const response = await client.chat.completions.create({
             messages: [
                 { role: "system", content: "Return ONLY a raw JSON array. No markdown." },
-                { role: "user", content: `Generate 10 MCQs for ${topic}. Format: [{"q":"text","options":["A","B","C","D"],"correct":0,"explanation":"text"}]` }
+                { 
+                  role: "user", 
+                  // ✅ Dynamic prompt based on user input
+                  content: `Generate ${count} ${level} difficulty MCQs for ${topic}. 
+                  Format: [{"q":"text","options":["A","B","C","D"],"correct":0,"explanation":"text"}]` 
+                }
             ],
             model: "gpt-4o", 
         });
@@ -45,15 +49,13 @@ app.get('/api/quiz', async (req, res) => {
     }
 });
 
-// ✅ STEP 4: FALLBACK ROUTE
 app.use((req, res, next) => {
     if (req.path.startsWith('/api')) return next();
-    
     const indexPath = path.join(frontendPath, 'index.html');
     if (fs.existsSync(indexPath)) {
         res.sendFile(indexPath);
     } else {
-        res.status(404).send("Error: index.html not found in " + frontendPath);
+        res.status(404).send("Error: index.html not found");
     }
 });
 
