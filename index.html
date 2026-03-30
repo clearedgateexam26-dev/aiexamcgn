@@ -1,336 +1,356 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>AI Exam Pro</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Exam Pro | Analysis Mode</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<style>
-:root{
-    --bg:#0b0e14;
-    --card:#111;
-    --text:#fff;
-    --primary:#00e5ff;
-}
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --card: #161b22;
+            --text: #f0f6fc;
+            --primary: #58a6ff;
+            --success: #3fb950;
+            --danger: #f85149;
+            --border: #30363d;
+        }
 
-body{
-    margin:0;
-    font-family:'Inter',sans-serif;
-    background:var(--bg);
-    color:var(--text);
-}
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
 
-/* HEADER */
-header{
-    display:flex;
-    justify-content:space-between;
-    padding:15px;
-    background:var(--card);
-}
+        header {
+            display: flex;
+            justify-content: space-between;
+            padding: 1rem 2rem;
+            background: var(--card);
+            border-bottom: 1px solid var(--border);
+        }
 
-button{
-    padding:10px;
-    border:none;
-    border-radius:6px;
-    background:var(--primary);
-    cursor:pointer;
-}
+        .container { max-width: 900px; margin: 0 auto; padding: 20px; }
 
-/* CONFIG */
-.config{
-    max-width:500px;
-    margin:30px auto;
-    padding:20px;
-    background:var(--card);
-    border-radius:10px;
-}
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: var(--primary);
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
 
-input,select{
-    width:100%;
-    padding:12px;
-    margin:10px 0;
-    background:#222;
-    color:white;
-    border:none;
-}
+        button:hover { opacity: 0.8; }
 
-/* LOADER */
-.loader{
-display:none;
-position:fixed;
-top:0;left:0;
-width:100%;height:100%;
-background:#0b0e14;
-justify-content:center;
-align-items:center;
-font-size:1.5rem;
-z-index:999;
-}
+        /* CONFIG */
+        .config {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 30px;
+            background: var(--card);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
 
-/* EXAM */
-.exam{display:none;padding:10px;}
-.layout{
-    display:grid;
-    grid-template-columns:1fr 260px;
-    gap:10px;
-}
+        input, select {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0 20px 0;
+            background: #0d1117;
+            color: white;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
 
-.main{
-    background:var(--card);
-    padding:15px;
-    border-radius:10px;
-}
+        /* EXAM LAYOUT */
+        .exam { display: none; }
+        .layout {
+            display: grid;
+            grid-template-columns: 1fr 280px;
+            gap: 20px;
+        }
 
-.option{
-    padding:12px;
-    margin:8px 0;
-    background:#333;
-    border-radius:6px;
-    cursor:pointer;
-}
-.option:hover{background:var(--primary);color:black}
-.selected{background:var(--primary);color:black}
+        .main-card {
+            background: var(--card);
+            padding: 25px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
 
-/* SIDEBAR */
-.sidebar{
-    background:var(--card);
-    padding:10px;
-    border-radius:10px;
-}
+        .option {
+            padding: 15px;
+            margin: 10px 0;
+            background: #21262d;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+        }
 
-.timer{
-    text-align:center;
-    font-size:1.2rem;
-    margin-bottom:10px;
-}
+        .option:hover { border-color: var(--primary); }
+        .selected { background: #1f6feb; border-color: #58a6ff; }
 
-.palette{
-    display:grid;
-    grid-template-columns:repeat(5,1fr);
-    gap:5px;
-}
+        /* SIDEBAR */
+        .sidebar {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            height: fit-content;
+        }
 
-.p{
-    padding:8px;
-    background:#222;
-    text-align:center;
-    cursor:pointer;
-}
+        .timer { font-size: 2rem; font-weight: 800; text-align: center; color: var(--primary); margin-bottom: 20px; }
+        .palette { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        .p-btn {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #21262d;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        .p-btn.active { border: 2px solid var(--primary); }
+        .p-btn.done { background: var(--success); color: white; }
 
-.p.done{background:var(--primary);color:black}
+        /* ANALYSIS DASHBOARD */
+        .dashboard { display: none; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, min-minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .stat-card { background: var(--card); padding: 20px; border-radius: 10px; text-align: center; border: 1px solid var(--border); }
+        
+        .review-card {
+            background: var(--card);
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 10px;
+            border-left: 5px solid #30363d;
+        }
+        .review-card.correct-border { border-left-color: var(--success); }
+        .review-card.wrong-border { border-left-color: var(--danger); }
+        
+        .label { font-size: 0.8rem; text-transform: uppercase; color: #8b949e; }
+        .val { font-size: 1.5rem; font-weight: bold; }
+        .ans-row { margin-top: 10px; padding: 10px; border-radius: 5px; }
+        .bg-success { background: rgba(63, 185, 80, 0.1); color: var(--success); }
+        .bg-danger { background: rgba(248, 81, 73, 0.1); color: var(--danger); }
 
-/* RESULT */
-.dashboard{display:none;padding:20px;}
-.card{background:var(--card);padding:15px;margin:10px 0;border-radius:8px;}
-.correct{color:lightgreen;}
-.wrong{color:red;}
+        .loader {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(11, 14, 20, 0.9); justify-content: center; align-items: center; z-index: 1000;
+        }
 
-/* 📱 MOBILE */
-@media(max-width:768px){
-    .layout{
-        grid-template-columns:1fr;
-    }
-    .sidebar{
-        order:2;
-    }
-    .main{
-        order:1;
-    }
-    button{
-        width:100%;
-        margin-top:5px;
-    }
-}
-</style>
+        @media (max-width: 768px) { .layout { grid-template-columns: 1fr; } .sidebar { order: -1; } }
+    </style>
 </head>
-
 <body>
 
 <header>
-<h3>AI Exam Pro</h3>
+    <h2>AI Exam Pro</h2>
 </header>
 
-<!-- LOADER -->
-<div class="loader" id="loader">⚡ Preparing your exam...</div>
+<div class="loader" id="loader"><h1>Generating Questions...</h1></div>
 
-<!-- CONFIG -->
-<div class="config" id="config">
+<div class="container">
+    <div class="config" id="config">
+        <h3>Exam Settings</h3>
+        <label>Topic</label>
+        <input type="text" id="topic" placeholder="e.g. JavaScript Closures">
+        
+        <label>Number of Questions</label>
+        <input type="number" id="count" value="5" min="1" max="20">
+        
+        <label>Time (Minutes)</label>
+        <input type="number" id="time" value="5" min="1">
 
-<label>📚 Topic</label>
-<input id="topic" placeholder="e.g. Percentage">
+        <label>Difficulty</label>
+        <select id="level">
+            <option value="easy">Easy</option>
+            <option value="medium" selected>Medium</option>
+            <option value="hard">Hard</option>
+        </select>
+        
+        <button onclick="startExam()" style="width:100%">Generate & Start</button>
+    </div>
 
-<label>🔢 Number of Questions</label>
-<input id="count" type="number" min="1" max="100" value="10">
+    <div class="exam" id="exam">
+        <div class="layout">
+            <div class="main-card">
+                <div id="q-container"></div>
+                <div style="margin-top:30px; display:flex; gap:10px;">
+                    <button onclick="prev()">Previous</button>
+                    <button onclick="next()">Next</button>
+                    <button onclick="submitExam()" style="background:var(--danger); margin-left:auto;">Finish Exam</button>
+                </div>
+            </div>
 
-<label>⏱ Time (minutes)</label>
-<input id="time" type="number" min="1" max="180" value="10">
+            <div class="sidebar">
+                <div class="timer" id="timer">00:00</div>
+                <div class="palette" id="palette"></div>
+            </div>
+        </div>
+    </div>
 
-<label>🎚 Difficulty</label>
-<select id="level">
-<option value="easy">Easy</option>
-<option value="medium" selected>Medium</option>
-<option value="hard">Hard</option>
-</select>
+    <div class="dashboard" id="dash">
+        <h1>Exam Analysis</h1>
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Score</div><div class="val" id="res-score">0/0</div></div>
+            <div class="stat-card"><div class="label">Accuracy</div><div class="val" id="res-acc">0%</div></div>
+            <div class="stat-card"><div class="label">Time Taken</div><div class="val" id="res-time">0s</div></div>
+        </div>
 
-<button onclick="startExam()">Start Exam</button>
+        <div style="max-width: 400px; margin: 0 auto 40px auto;">
+            <canvas id="resultChart"></canvas>
+        </div>
 
-</div>
-
-<!-- EXAM -->
-<div class="exam" id="exam">
-<div class="layout">
-
-<div class="main">
-<div id="qbox"></div>
-
-<button onclick="prev()">Prev</button>
-<button onclick="next()">Next</button>
-<button onclick="submitExam()">Submit</button>
-</div>
-
-<div class="sidebar">
-<div id="timer" class="timer"></div>
-<div id="palette" class="palette"></div>
-</div>
-
-</div>
-</div>
-
-<!-- RESULT -->
-<div class="dashboard" id="dash">
-<h2>Result</h2>
-
-<div id="score"></div>
-<div id="accuracy"></div>
-<div id="insight"></div>
-
-<canvas id="chart"></canvas>
-
-<div id="review"></div>
+        <h3>Question Breakdown</h3>
+        <div id="review-list"></div>
+        
+        <button onclick="location.reload()" style="margin-top:20px;">Take Another Quiz</button>
+    </div>
 </div>
 
 <script>
-let quiz = [], ans = [], i = 0, timeLeft, timerInt;
+    let quiz = [], userAnswers = [], currentIndex = 0;
+    let timeLeft, timerInterval, totalDuration;
 
-async function startExam() {
-    const configDiv = document.getElementById("config");
-    const examDiv = document.getElementById("exam");
-    const loader = document.getElementById("loader");
+    async function startExam() {
+        const topic = document.getElementById('topic').value;
+        const count = document.getElementById('count').value;
+        const level = document.getElementById('level').value;
+        totalDuration = document.getElementById('time').value * 60;
 
-    let topic = document.getElementById("topic").value.trim();
-    let count = parseInt(document.getElementById("count").value);
-    let timeInput = parseInt(document.getElementById("time").value);
-    let level = document.getElementById("level").value;
+        if(!topic) return alert("Enter a topic!");
 
-    if (!topic) { alert("Please enter a topic"); return; }
-    
-    // ✅ Set timer based on user input
-    timeLeft = timeInput * 60; 
-    loader.style.display = "flex";
+        document.getElementById('loader').style.display = 'flex';
 
-    try {
-        // ✅ Passing count and level to the API
-        let res = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
-        quiz = await res.json();
+        try {
+            const res = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
+            quiz = await res.json();
+            
+            userAnswers = new Array(quiz.length).fill(null);
+            timeLeft = totalDuration;
 
-        if (!Array.isArray(quiz)) throw new Error("Invalid response");
+            document.getElementById('config').style.display = 'none';
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('exam').style.display = 'block';
 
-        loader.style.display = "none";
-        ans = new Array(quiz.length).fill(null);
-        i = 0; // Reset index
-
-        configDiv.style.display = "none";
-        examDiv.style.display = "block";
-
-        buildPalette();
-        showQ();
-        startTimer();
-
-    } catch (e) {
-        loader.style.display = "none";
-        alert("Error loading quiz. Check your API key or connection.");
-        console.error(e);
-    }
-}
-
-function startTimer() {
-    const timerDisplay = document.getElementById("timer");
-    // Clear any existing timer first
-    if(timerInt) clearInterval(timerInt);
-    
-    timerInt = setInterval(() => {
-        timeLeft--;
-        let m = Math.floor(timeLeft / 60);
-        let s = timeLeft % 60;
-        timerDisplay.innerText = `${m}:${s < 10 ? "0" : ""}${s}`;
-        if (timeLeft <= 0) {
-            clearInterval(timerInt);
-            submitExam();
+            renderPalette();
+            showQuestion();
+            startTimer();
+        } catch (err) {
+            alert("Failed to load quiz. Check server connection.");
+            document.getElementById('loader').style.display = 'none';
         }
-    }, 1000);
-}
+    }
 
-function showQ() {
-    let q = quiz[i];
-    const qbox = document.getElementById("qbox");
-    qbox.innerHTML = `
-        <h3>${i + 1}. ${q.q}</h3>
-        ${q.options.map((o, x) => `
-            <div class="option ${ans[i] === x ? "selected" : ""}" onclick="select(${x})">${o}</div>
-        `).join("")}
-    `;
-    updatePalette();
-}
+    function startTimer() {
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            const mins = Math.floor(timeLeft / 60);
+            const secs = timeLeft % 60;
+            document.getElementById('timer').innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+            if(timeLeft <= 0) submitExam();
+        }, 1000);
+    }
 
-function select(x) {
-    ans[i] = x;
-    showQ();
-    updatePalette();
-}
+    function showQuestion() {
+        const q = quiz[currentIndex];
+        const container = document.getElementById('q-container');
+        
+        container.innerHTML = `
+            <div class="label">Question ${currentIndex + 1} of ${quiz.length}</div>
+            <h2 style="margin: 10px 0 25px 0;">${q.q}</h2>
+            <div id="options">
+                ${q.options.map((opt, i) => `
+                    <div class="option ${userAnswers[currentIndex] === i ? 'selected' : ''}" onclick="selectOption(${i})">
+                        ${opt}
+                    </div>
+                `).join('')}
+            </div>
+        `;
+        updatePaletteUI();
+    }
 
-function next() { if (i < quiz.length - 1) { i++; showQ(); } }
-function prev() { if (i > 0) { i--; showQ(); } }
+    function selectOption(idx) {
+        userAnswers[currentIndex] = idx;
+        showQuestion();
+    }
 
-function buildPalette() {
-    const palette = document.getElementById("palette");
-    palette.innerHTML = quiz.map((_, x) => `
-        <div class="p" id="p${x}" onclick="jump(${x})">${x + 1}</div>
-    `).join("");
-}
+    function renderPalette() {
+        const p = document.getElementById('palette');
+        p.innerHTML = quiz.map((_, i) => `<div class="p-btn" id="p-${i}" onclick="jumpTo(${i})">${i+1}</div>`).join('');
+    }
 
-function updatePalette() {
-    ans.forEach((a, x) => {
-        const pBtn = document.getElementById(`p${x}`);
-        if (a !== null) pBtn.classList.add("done");
-    });
-}
+    function updatePaletteUI() {
+        quiz.forEach((_, i) => {
+            const btn = document.getElementById(`p-${i}`);
+            btn.className = 'p-btn';
+            if(i === currentIndex) btn.classList.add('active');
+            if(userAnswers[i] !== null) btn.classList.add('done');
+        });
+    }
 
-function jump(x) { i = x; showQ(); }
+    function jumpTo(i) { currentIndex = i; showQuestion(); }
+    function next() { if(currentIndex < quiz.length - 1) { currentIndex++; showQuestion(); } }
+    function prev() { if(currentIndex > 0) { currentIndex--; showQuestion(); } }
 
-function submitExam() {
-    clearInterval(timerInt);
-    const examDiv = document.getElementById("exam");
-    const dashDiv = document.getElementById("dash");
-    
-    let correct = 0, wrong = 0, skip = 0;
-    quiz.forEach((q, x) => {
-        if (ans[x] == null) skip++;
-        else if (ans[x] == q.correct) correct++;
-        else wrong++;
-    });
+    function submitExam() {
+        clearInterval(timerInterval);
+        document.getElementById('exam').style.display = 'none';
+        document.getElementById('dash').style.display = 'block';
 
-    let acc = ((correct / quiz.length) * 100).toFixed(1);
-    examDiv.style.display = "none";
-    dashDiv.style.display = "block";
+        let correct = 0, wrong = 0, skipped = 0;
+        const reviewList = document.getElementById('review-list');
+        reviewList.innerHTML = '';
 
-    document.getElementById("score").innerText = `Score: ${correct}/${quiz.length}`;
-    document.getElementById("accuracy").innerText = `Accuracy: ${acc}%`;
-    
-    // ... rest of your Chart.js and Review code ...
-}
+        quiz.forEach((q, i) => {
+            const isCorrect = userAnswers[i] === q.correct;
+            if(userAnswers[i] === null) skipped++;
+            else if(isCorrect) correct++;
+            else wrong++;
+
+            // Create Review Card
+            const card = document.createElement('div');
+            card.className = `review-card ${userAnswers[i] === null ? '' : (isCorrect ? 'correct-border' : 'wrong-border')}`;
+            
+            card.innerHTML = `
+                <h4>Q${i+1}: ${q.q}</h4>
+                <div class="ans-row ${userAnswers[i] === q.correct ? 'bg-success' : (userAnswers[i] === null ? '' : 'bg-danger')}">
+                    <b>Your Answer:</b> ${userAnswers[i] !== null ? q.options[userAnswers[i]] : '<i>Not Answered</i>'}
+                </div>
+                ${!isCorrect ? `<div class="ans-row bg-success"><b>Correct Answer:</b> ${q.options[q.correct]}</div>` : ''}
+                <p style="margin-top:15px; font-size:0.9rem; color:#8b949e"><b>Explanation:</b> ${q.explanation}</p>
+            `;
+            reviewList.appendChild(card);
+        });
+
+        // Update Stats
+        document.getElementById('res-score').innerText = `${correct}/${quiz.length}`;
+        document.getElementById('res-acc').innerText = `${((correct/quiz.length)*100).toFixed(1)}%`;
+        document.getElementById('res-time').innerText = `${totalDuration - timeLeft}s`;
+
+        // Chart
+        new Chart(document.getElementById('resultChart'), {
+            type: 'doughnut',
+            data: {
+                labels: ['Correct', 'Wrong', 'Skipped'],
+                datasets: [{
+                    data: [correct, wrong, skipped],
+                    backgroundColor: ['#3fb950', '#f85149', '#30363d']
+                }]
+            },
+            options: { plugins: { legend: { position: 'bottom', labels: { color: '#fff' } } } }
+        });
+    }
 </script>
 
 </body>
