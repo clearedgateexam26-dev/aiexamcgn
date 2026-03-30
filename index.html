@@ -1,327 +1,344 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Exam Pro MAX</title>
-    <style>
-        :root {
-            --primary: #00e5ff;
-            --bg: #0f2027;
-            --card-bg: rgba(255, 255, 255, 0.07);
-            --success: #2e7d32;
-            --danger: #c62828;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Exam Pro</title>
 
-        body {
-            margin: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            color: white;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-        .container {
-            max-width: 800px;
-            width: 90%;
-            margin: 40px auto;
-            padding: 20px;
-        }
+<style>
+:root{
+    --bg:#0b0e14;
+    --card:#111;
+    --text:#fff;
+    --primary:#00e5ff;
+}
 
-        h1 {
-            text-align: center;
-            color: var(--primary);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-        }
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+}
 
-        /* Search & Input */
-        .input-box {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-        }
+/* HEADER */
+header{
+    display:flex;
+    justify-content:space-between;
+    padding:15px;
+    background:var(--card);
+}
 
-        input {
-            flex: 1;
-            padding: 15px;
-            border-radius: 8px;
-            border: none;
-            background: #1e1e1e;
-            color: white;
-            font-size: 1rem;
-            outline: none;
-            border: 2px solid transparent;
-        }
+button{
+    padding:10px;
+    border:none;
+    border-radius:6px;
+    background:var(--primary);
+    cursor:pointer;
+}
 
-        input:focus {
-            border-color: var(--primary);
-        }
+/* CONFIG */
+.config{
+    max-width:500px;
+    margin:30px auto;
+    padding:20px;
+    background:var(--card);
+    border-radius:10px;
+}
 
-        button {
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            background: var(--primary);
-            color: #000;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
+input,select{
+    width:100%;
+    padding:12px;
+    margin:10px 0;
+    background:#222;
+    color:white;
+    border:none;
+}
 
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 229, 255, 0.4);
-        }
+/* LOADER */
+.loader{
+display:none;
+position:fixed;
+top:0;left:0;
+width:100%;height:100%;
+background:#0b0e14;
+justify-content:center;
+align-items:center;
+font-size:1.5rem;
+z-index:999;
+}
 
-        button:disabled {
-            background: #444;
-            cursor: not-allowed;
-        }
+/* EXAM */
+.exam{display:none;padding:10px;}
+.layout{
+    display:grid;
+    grid-template-columns:1fr 260px;
+    gap:10px;
+}
 
-        /* Quiz UI */
-        .quiz-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(12px);
-            padding: 30px;
-            border-radius: 15px;
-            border: 1px solid rgba(255,255,255,0.1);
-            margin-top: 20px;
-        }
+.main{
+    background:var(--card);
+    padding:15px;
+    border-radius:10px;
+}
 
-        .option {
-            display: block;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-            background: rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: 0.2s;
-            border: 2px solid transparent;
-        }
+.option{
+    padding:12px;
+    margin:8px 0;
+    background:#333;
+    border-radius:6px;
+    cursor:pointer;
+}
+.option:hover{background:var(--primary);color:black}
+.selected{background:var(--primary);color:black}
 
-        .option:hover {
-            background: rgba(255,255,255,0.1);
-        }
+/* SIDEBAR */
+.sidebar{
+    background:var(--card);
+    padding:10px;
+    border-radius:10px;
+}
 
-        input[type="radio"] { display: none; }
+.timer{
+    text-align:center;
+    font-size:1.2rem;
+    margin-bottom:10px;
+}
 
-        /* States */
-        .selected { border-color: var(--primary); background: rgba(0, 229, 255, 0.1); }
-        .correct { background: var(--success) !important; border-color: #4caf50 !important; }
-        .wrong { background: var(--danger) !important; border-color: #f44336 !important; }
+.palette{
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+    gap:5px;
+}
 
-        .explanation {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(255, 152, 0, 0.15);
-            border-left: 4px solid #ff9800;
-            border-radius: 5px;
-            display: none;
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
+.p{
+    padding:8px;
+    background:#222;
+    text-align:center;
+    cursor:pointer;
+}
 
-        /* Navigation & Progress */
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background: #333;
-            border-radius: 10px;
-            margin: 20px 0;
-            overflow: hidden;
-        }
+.p.done{background:var(--primary);color:black}
 
-        .progress-bar {
-            height: 100%;
-            width: 0%;
-            background: var(--primary);
-            transition: 0.4s;
-        }
+/* RESULT */
+.dashboard{display:none;padding:20px;}
+.card{background:var(--card);padding:15px;margin:10px 0;border-radius:8px;}
+.correct{color:lightgreen;}
+.wrong{color:red;}
 
-        .nav-btns {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 25px;
-        }
-
-        .timer {
-            text-align: right;
-            font-size: 1.2rem;
-            color: #ff9800;
-            font-family: monospace;
-            margin-bottom: 10px;
-        }
-
-        #result-display {
-            text-align: center;
-            font-size: 2rem;
-            margin: 20px 0;
-            color: var(--primary);
-            display: none;
-        }
-
-        .hidden { display: none; }
-    </style>
+/* 📱 MOBILE */
+@media(max-width:768px){
+    .layout{
+        grid-template-columns:1fr;
+    }
+    .sidebar{
+        order:2;
+    }
+    .main{
+        order:1;
+    }
+    button{
+        width:100%;
+        margin-top:5px;
+    }
+}
+</style>
 </head>
+
 <body>
 
-<div class="container">
-    <h1>🚀 AI Exam Pro MAX</h1>
+<header>
+<h3>AI Exam Pro</h3>
+</header>
 
-    <div class="input-box">
-        <input type="text" id="topic" placeholder="Enter Topic (e.g., Quantum Physics)">
-        <button id="startBtn" onclick="fetchQuiz()">Generate Quiz</button>
-    </div>
+<!-- LOADER -->
+<div class="loader" id="loader">⚡ Preparing your exam...</div>
 
-    <div id="quiz-area" class="hidden">
-        <div class="timer" id="timer">⏱ 10:00</div>
-        <div class="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
+<!-- CONFIG -->
+<div class="config" id="config">
 
-        <div id="quiz-box"></div>
+<label>📚 Topic</label>
+<input id="topic" placeholder="e.g. Percentage">
 
-        <div class="nav-btns">
-            <button onclick="changeQuestion(-1)">⬅ Previous</button>
-            <button onclick="changeQuestion(1)">Next ➡</button>
-        </div>
+<label>🔢 Number of Questions</label>
+<input id="count" type="number" min="1" max="100" value="10">
 
-        <button id="submitBtn" style="width: 100%; margin-top: 20px; background: #4caf50; color: white;" onclick="submitQuiz()">Final Submission</button>
-    </div>
+<label>⏱ Time (minutes)</label>
+<input id="time" type="number" min="1" max="180" value="10">
 
-    <div id="result-display"></div>
+<label>🎚 Difficulty</label>
+<select id="level">
+<option value="easy">Easy</option>
+<option value="medium" selected>Medium</option>
+<option value="hard">Hard</option>
+</select>
+
+<button onclick="startExam()">Start Exam</button>
+
+</div>
+
+<!-- EXAM -->
+<div class="exam" id="exam">
+<div class="layout">
+
+<div class="main">
+<div id="qbox"></div>
+
+<button onclick="prev()">Prev</button>
+<button onclick="next()">Next</button>
+<button onclick="submitExam()">Submit</button>
+</div>
+
+<div class="sidebar">
+<div id="timer" class="timer"></div>
+<div id="palette" class="palette"></div>
+</div>
+
+</div>
+</div>
+
+<!-- RESULT -->
+<div class="dashboard" id="dash">
+<h2>Result</h2>
+
+<div id="score"></div>
+<div id="accuracy"></div>
+<div id="insight"></div>
+
+<canvas id="chart"></canvas>
+
+<div id="review"></div>
 </div>
 
 <script>
-    let quizData = [];
-    let currentIdx = 0;
-    let userAnswers = [];
-    let isSubmitted = false;
-    let timeLeft = 600;
-    let timerId;
 
-    async function fetchQuiz() {
-        const topic = document.getElementById('topic').value;
-        const startBtn = document.getElementById('startBtn');
-        if (!topic) return alert("Please enter a topic!");
+let quiz=[],ans=[],i=0,timeLeft,timerInt;
 
-        startBtn.disabled = true;
-        startBtn.innerText = "Generating AI Quiz...";
+/* START */
+async function startExam(){
 
-        try {
-            const response = await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}`);
-            quizData = await response.json();
-            
-            userAnswers = new Array(quizData.length).fill(null);
-            currentIdx = 0;
-            isSubmitted = false;
-            timeLeft = 600;
+document.getElementById("loader").style.display="flex";
 
-            document.getElementById('quiz-area').classList.remove('hidden');
-            document.getElementById('result-display').style.display = 'none';
-            document.getElementById('submitBtn').classList.remove('hidden');
-            
-            startTimer();
-            renderQuestion();
-        } catch (err) {
-            alert("Error fetching quiz. Make sure your server is running!");
-            console.error(err);
-        } finally {
-            startBtn.disabled = false;
-            startBtn.innerText = "Generate Quiz";
-        }
-    }
+let topic=document.getElementById("topic").value.trim();
+let count=parseInt(document.getElementById("count").value);
+let time=parseInt(document.getElementById("time").value);
+let level=document.getElementById("level").value;
 
-    function startTimer() {
-        clearInterval(timerId);
-        timerId = setInterval(() => {
-            timeLeft--;
-            let mins = Math.floor(timeLeft / 60);
-            let secs = timeLeft % 60;
-            document.getElementById('timer').innerText = `⏱ ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-            if (timeLeft <= 0) submitQuiz();
-        }, 1000);
-    }
+if(!topic){ alert("Enter topic"); return; }
 
-    function renderQuestion() {
-        const q = quizData[currentIdx];
-        const box = document.getElementById('quiz-box');
-        
-        const optionsHtml = q.options.map((opt, i) => {
-            let stateClass = "";
-            if (userAnswers[currentIdx] === i) stateClass = "selected";
-            
-            if (isSubmitted) {
-                if (i === q.correct) stateClass = "correct";
-                else if (userAnswers[currentIdx] === i) stateClass = "wrong";
-            }
+timeLeft=time*60;
 
-            return `
-                <label class="option ${stateClass}">
-                    <input type="radio" name="quizOpt" value="${i}" 
-                        ${userAnswers[currentIdx] === i ? 'checked' : ''} 
-                        ${isSubmitted ? 'disabled' : ''}
-                        onchange="handleSelect(${i})">
-                    ${String.fromCharCode(65 + i)}. ${opt}
-                </label>
-            `;
-        }).join('');
+try{
 
-        box.innerHTML = `
-            <div class="quiz-card">
-                <small>Question ${currentIdx + 1} of ${quizData.length}</small>
-                <h2>${q.q}</h2>
-                <div class="options-list">${optionsHtml}</div>
-                <div class="explanation" id="exp-box" style="display: ${isSubmitted ? 'block' : 'none'}">
-                    <strong>💡 Explanation:</strong><br>${q.explanation}
-                </div>
-            </div>
-        `;
+let res=await fetch(`/api/quiz?topic=${encodeURIComponent(topic)}&count=${count}&level=${level}`);
+quiz=await res.json();
 
-        // Update progress bar
-        document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / quizData.length) * 100}%`;
-    }
+document.getElementById("loader").style.display="none";
 
-    function handleSelect(val) {
-        if (isSubmitted) return;
-        userAnswers[currentIdx] = val;
-        renderQuestion();
-    }
+ans=new Array(quiz.length).fill(null);
 
-    function changeQuestion(step) {
-        let newIdx = currentIdx + step;
-        if (newIdx >= 0 && newIdx < quizData.length) {
-            currentIdx = newIdx;
-            renderQuestion();
-        }
-    }
+config.style.display="none";
+exam.style.display="block";
 
-    function submitQuiz() {
-        if (isSubmitted) return;
-        if (!confirm("Do you want to submit your answers?")) return;
+buildPalette();
+showQ();
+startTimer();
 
-        isSubmitted = true;
-        clearInterval(timerId);
+}catch(e){
+document.getElementById("loader").style.display="none";
+alert("Error loading quiz");
+}
+}
 
-        let score = 0;
-        quizData.forEach((q, i) => {
-            if (userAnswers[i] === q.correct) score++;
-        });
+/* TIMER */
+function startTimer(){
+timerInt=setInterval(()=>{
+timeLeft--;
+let m=Math.floor(timeLeft/60);
+let s=timeLeft%60;
+timer.innerText=`${m}:${s<10?"0":""}${s}`;
+if(timeLeft<=0)submitExam();
+},1000);
+}
 
-        const resDisplay = document.getElementById('result-display');
-        resDisplay.innerHTML = `🎯 Your Score: ${score} / ${quizData.length}`;
-        resDisplay.style.display = 'block';
-        document.getElementById('submitBtn').classList.add('hidden');
-        
-        currentIdx = 0; // Reset to first question for review
-        renderQuestion();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+/* SHOW */
+function showQ(){
+let q=quiz[i];
+qbox.innerHTML=`
+<h3>${i+1}. ${q.q}</h3>
+${q.options.map((o,x)=>`
+<div class="option ${ans[i]==x?"selected":""}" onclick="select(${x})">${o}</div>
+`).join("")}
+`;
+}
+
+/* ACTION */
+function select(x){ans[i]=x;showQ();}
+function next(){if(i<quiz.length-1){i++;showQ();}}
+function prev(){if(i>0){i--;showQ();}}
+
+/* PALETTE */
+function buildPalette(){
+palette.innerHTML=quiz.map((_,x)=>`
+<div class="p" onclick="jump(${x})">${x+1}</div>
+`).join("");
+}
+function jump(x){i=x;showQ();}
+
+/* RESULT */
+function submitExam(){
+
+clearInterval(timerInt);
+
+let correct=0,wrong=0,skip=0;
+
+quiz.forEach((q,x)=>{
+if(ans[x]==null) skip++;
+else if(ans[x]==q.correct) correct++;
+else wrong++;
+});
+
+let acc=((correct/quiz.length)*100).toFixed(1);
+
+exam.style.display="none";
+dash.style.display="block";
+
+score.innerText=`Score: ${correct}/${quiz.length}`;
+accuracy.innerText=`Accuracy: ${acc}%`;
+
+insight.innerText=
+acc>80?"🔥 Excellent":
+acc>50?"👍 Good":
+"⚠️ Practice more";
+
+new Chart(chart,{
+type:"doughnut",
+data:{
+labels:["Correct","Wrong","Skipped"],
+datasets:[{data:[correct,wrong,skip]}]
+}
+});
+
+/* REVIEW */
+review.innerHTML="<h2>Answer Review</h2>";
+
+quiz.forEach((q,x)=>{
+review.innerHTML+=`
+<div class="card">
+<b>Q${x+1}. ${q.q}</b><br>
+Your: <span class="${ans[x]==q.correct?'correct':'wrong'}">
+${ans[x]!=null?q.options[ans[x]]:"Not Attempted"}
+</span><br>
+Correct: ${q.options[q.correct]}<br>
+${q.explanation}
+</div>
+`;
+});
+
+}
+
 </script>
 
 </body>
